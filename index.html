@@ -25,7 +25,7 @@ html, body {
 button:active { transform: scale(0.95); opacity: 0.9; transition: transform 0.1s, opacity 0.1s; }
 
 .colourful-welcome { background: rgba(255,255,255,0.85); color: #333; padding: 40px 20px; border-radius: 15px; max-width: 700px; margin: 0 auto; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-.colourful-welcome h1 { font-size: 28px; word-wrap: break-word; overflow-wrap: break-word; }
+.colourful-welcome h1 { font-size: 28px; }
 .colourful-welcome h2 { font-size: 20px; }
 @keyframes gradientBG {
   0% { background-position: 0% 50%; }
@@ -42,101 +42,42 @@ button:active { transform: scale(0.95); opacity: 0.9; transition: transform 0.1s
 .category-btn.active { border-color: #1976d2; background: #e3f2fd; color: #1976d2; }
 .category-btn .badge { display: block; font-size: 12px; color: #999; margin-top: 4px; }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
+.grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-width: 800px; margin: 0 auto; }
 .question-btn {
-  height: 48px;
-  font-size: 15px;
-  font-weight: 700;
-  background: #1976d2;
-  color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+  height: 48px; font-size: 15px; font-weight: 700; background: #1976d2; color: #ffffff;
+  border-radius: 8px; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
   transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
-  cursor: pointer;
-  outline: none;
-  border: none;
+  cursor: pointer; outline: none; border: none;
 }
-
-.question-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-  filter: brightness(1.05);
-}
-
-.question-btn:active:not(:disabled) {
-  transform: scale(0.92) translateY(1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  filter: brightness(0.95);
-}
-
-/* Highlight answered questions */
-.question-btn:disabled {
-  background: #4caf50;           /* green */
-  color: #ffffff;
-  opacity: 0.9;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-  border: 2px solid #2e7d32;    /* darker green border for emphasis */
-  font-weight: 800;
-}
+.question-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15); filter: brightness(1.05); }
+.question-btn:active:not(:disabled) { transform: scale(0.92) translateY(1px); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); filter: brightness(0.95); }
+.question-btn:disabled { background: #4caf50; color: #ffffff; opacity: 0.85; cursor: not-allowed; box-shadow: none; transform: none; }
 
 #board { display: none; }
-
 #questionBox {
   display: none; background: white; border-radius: 16px;
   box-shadow: 0 -4px 20px rgba(0,0,0,0.08); padding: 20px; max-width: 800px; margin: 15px auto;
   min-height: calc(100vh - 30px); max-height: calc(100vh - 30px); overflow-y: auto;
 }
-
 #answerArea { margin-top: 16px; border-top: 1px solid #eee; padding-top: 16px; }
 
-.math-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 10px;
-}
+.math-toolbar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
 .math-toolbar button {
-  background: #f0f4ff;
-  border: 1px solid #c3d9ff;
-  color: #1a3b6e;
-  padding: 6px 10px;
-  font-size: 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-  min-width: 36px;
+  background: #f0f4ff; border: 1px solid #c3d9ff; color: #1a3b6e; padding: 6px 10px;
+  font-size: 15px; border-radius: 6px; cursor: pointer; transition: all 0.2s; min-width: 36px;
   font-family: 'Courier New', monospace;
 }
-.math-toolbar button:hover {
-  background: #dbeafe;
-  border-color: #1976d2;
-}
+.math-toolbar button:hover { background: #dbeafe; border-color: #1976d2; }
 .math-preview {
-  font-size: 16px;
-  padding: 8px 12px;
-  background: #f9f9ff;
-  border-radius: 8px;
-  min-height: 30px;
-  margin-bottom: 8px;
-  color: #333;
-  border: 1px dashed #ccc;
-  display: none;
+  font-size: 16px; padding: 8px 12px; background: #f9f9ff; border-radius: 8px;
+  min-height: 30px; margin-bottom: 8px; color: #333; border: 1px dashed #ccc; display: none;
 }
 
 #textAnswer {
   width: 100%; padding: 12px 16px; font-size: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   border-radius: 12px; border: 2px solid #d0d0d0; resize: vertical; box-sizing: border-box;
-  min-height: 120px; max-height: none; overflow-y: auto; background: white; transition: border-color 0.3s, box-shadow 0.3s;
-  line-height: 1.5; color: #1a1a2e; outline: none;
+  min-height: 120px; max-height: none; overflow-y: auto; background: white;
+  transition: border-color 0.3s, box-shadow 0.3s; line-height: 1.5; color: #1a1a2e; outline: none;
 }
 #textAnswer:focus { border-color: #1976d2; box-shadow: 0 0 0 3px rgba(25,118,210,0.15); }
 #textAnswer::placeholder { color: #aaa; font-size: 14px; }
@@ -168,133 +109,56 @@ button:active { transform: scale(0.95); opacity: 0.9; transition: transform 0.1s
 #leaderboard th { background: #263238; color: white; padding: 12px; font-weight: 600; }
 #leaderboard td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; }
 
-#systemMessage {
-  display: none; background: #ffeb3b; color: black; padding: 15px; font-size: 20px; font-weight: bold;
-  position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; border-bottom: 3px solid #ff9800; text-align: center;
-}
-#pauseOverlay {
-  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9);
-  color: white; font-size: 40px; font-weight: bold; z-index: 99999; padding-top: 200px; text-align: center; pointer-events: all; cursor: default;
-}
-#tabWarning {
-  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95);
-  color: #ff4444; font-size: 28px; font-weight: bold; z-index: 999999; padding-top: 250px; text-align: center;
-}
+#systemMessage { display: none; background: #ffeb3b; color: black; padding: 15px; font-size: 20px; font-weight: bold; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; border-bottom: 3px solid #ff9800; text-align: center; }
+#pauseOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); color: white; font-size: 40px; font-weight: bold; z-index: 99999; padding-top: 200px; text-align: center; pointer-events: all; cursor: default; }
+#tabWarning { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); color: #ff4444; font-size: 28px; font-weight: bold; z-index: 999999; padding-top: 250px; text-align: center; }
 #tabWarning span { display: block; font-size: 60px; margin-bottom: 20px; }
 #tabWarning .warning-sub { color: #ffaa00; font-size: 18px; font-weight: normal; margin-top: 20px; }
 #tabWarning .warning-count { color: #ffffff; font-size: 16px; font-weight: normal; margin-top: 15px; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; display: inline-block; }
 
 .register-link { display: block; margin: 15px auto; color: #1976d2; text-decoration: underline; cursor: pointer; font-size: 16px; }
 
-.board-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  padding: 8px 12px;
-  gap: 8px;
-  margin: 10px 0 15px 0;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
+.board-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 8px 12px; gap: 8px; margin: 10px 0 15px 0; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+.toolbar-group { display: flex; gap: 10px; align-items: center; }
+.board-toolbar button, .toolbar-group button { padding: 6px 12px !important; font-size: 13px !important; border-radius: 6px !important; transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease; cursor: pointer; outline: none; border: none; font-weight: 600; }
+.board-toolbar button:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15); filter: brightness(1.05); }
+.board-toolbar button:active { transform: scale(0.92) translateY(1px); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); filter: brightness(0.95); }
 
-.toolbar-group {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
+#consentOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999999; color: white; text-align: center; padding-top: 15%; display: none; }
+#consentOverlay > div { background: #222; display: inline-block; padding: 30px; border-radius: 15px; max-width: 500px; }
+#camPreviewContainer { position: fixed; top: 10px; right: 10px; z-index: 99998; border: 2px solid #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3); background: #000; transition: all 0.3s; display: none; }
+#camPreview { width: 160px; height: 120px; object-fit: cover; }
+#toggleCamPreview { position: absolute; bottom: 2px; right: 2px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 4px; font-size: 10px; cursor: pointer; }
+#recordingIndicator { position: absolute; top: 2px; left: 2px; color: red; font-size: 12px; background: rgba(0,0,0,0.5); padding: 2px 4px; border-radius: 4px; }
 
-.board-toolbar button,
-.toolbar-group button {
-  padding: 6px 12px !important;
-  font-size: 13px !important;
-  border-radius: 6px !important;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
-  cursor: pointer;
-  outline: none;
-  border: none;
-  font-weight: 600;
+/* ===== MODULE A/B ADDITIONS ===== */
+#offlineBanner {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; z-index: 999998;
+  background: #37474f; color: #fff; text-align: center; padding: 10px; font-weight: 600; font-size: 14px;
 }
-
-.board-toolbar button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-  filter: brightness(1.05);
+#offlineBanner.grace { background: #e65100; }
+#syncPill {
+  position: fixed; bottom: 10px; left: 10px; z-index: 999997; background: rgba(0,0,0,0.75); color: #fff;
+  padding: 6px 12px; border-radius: 20px; font-size: 12px; display: none;
 }
-
-.board-toolbar button:active {
-  transform: scale(0.92) translateY(1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  filter: brightness(0.95);
+#cameraGate {
+  display: none; position: fixed; inset: 0; background: #0d1117; color: #fff; z-index: 9999999;
+  text-align: center; padding-top: 18vh;
 }
-
-#consentOverlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.85);
-  z-index: 999999;
-  color: white;
-  text-align: center;
-  padding-top: 15%;
-  display: none;
+#cameraGate h2 { font-size: 26px; margin-bottom: 14px; }
+#cameraGate p { font-size: 15px; color: #ccc; max-width: 480px; margin: 8px auto; line-height: 1.5; }
+#cameraGate button {
+  margin-top: 18px; background: #1976d2; color: #fff; border: none; padding: 12px 30px;
+  border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600;
 }
-#consentOverlay > div {
-  background: #222;
-  display: inline-block;
-  padding: 30px;
-  border-radius: 15px;
-  max-width: 500px;
+#integrityLock {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.97); color: #ff6b6b; z-index: 99999999;
+  text-align: center; padding-top: 22vh;
 }
-
-/* Camera preview: highest z-index to float above everything */
-#camPreviewContainer {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 9999999;          /* above all other elements */
-  border: 2px solid #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-  background: #000;
-  transition: all 0.3s;
-  display: none;
-}
-#camPreview {
-  width: 160px;
-  height: 120px;
-  object-fit: cover;
-}
-#toggleCamPreview {
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  background: rgba(0,0,0,0.5);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 10px;
-  cursor: pointer;
-}
-#recordingIndicator {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  color: red;
-  font-size: 12px;
-  background: rgba(0,0,0,0.5);
-  padding: 2px 4px;
-  border-radius: 4px;
-}
+#integrityLock h2 { font-size: 30px; }
+#integrityLock p { color: #ffaa00; font-size: 16px; margin-top: 12px; max-width: 500px; margin-left: auto; margin-right: auto; }
 
 body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85px); max-height: calc(100vh - 85px); }
-
-/* Responsive font size for welcome heading to prevent truncation */
-@media (max-width: 480px) {
-  .colourful-welcome h1 { font-size: 22px; }
-}
 
 @media (max-width: 768px) {
   body { padding: 8px; padding-top: 60px; }
@@ -305,6 +169,8 @@ body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85
   .question-btn { height: 50px; font-size: 14px; }
   .category-btn { padding: 12px 18px; font-size: 14px; min-width: 110px; }
   .board-toolbar button { padding: 6px 10px; font-size: 12px; }
+  #camPreviewContainer { top: auto; bottom: 10px; right: 10px; }
+  #camPreview { width: 120px; height: 90px; }
 }
 @media (max-width: 480px) {
   body { padding: 4px; padding-top: 55px; }
@@ -313,25 +179,37 @@ body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85
   #submitBtn { font-size: 14px; padding: 10px 16px; }
   .grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
   .question-btn { height: 44px; font-size: 13px; }
+  #camPreviewContainer { top: auto; bottom: 5px; right: 5px; }
+  #camPreview { width: 100px; height: 75px; }
 }
 </style>
 </head>
 <body>
 
-<!-- SYSTEM MESSAGES -->
+<div id="offlineBanner"></div>
+<div id="syncPill"></div>
+
+<div id="cameraGate">
+  <h2>📷 Camera Access Required</h2>
+  <p id="cameraGateMsg">This quiz requires camera access for integrity monitoring. Please allow camera access and try again.</p>
+  <button onclick="retryCameraCheck()">🔄 Retry Camera Check</button>
+</div>
+
+<div id="integrityLock">
+  <h2 id="integrityLockTitle">🚫 Quiz Submitted</h2>
+  <p id="integrityLockMsg">Your quiz was submitted automatically due to an integrity violation.</p>
+</div>
+
 <div id="systemMessage"></div>
 <div id="pauseOverlay"></div>
 <div id="tabWarning">
   <span>🚨</span>
   ⚠️ TAB SWITCH DETECTED!<br>
   <span class="warning-sub">You left the quiz window. This has been recorded.</span>
-  <div class="warning-count" id="tabWarningCount">Warning 1 of 1</div>
-  <span class="warning-sub" style="font-size: 14px; color: #ff6b6b;">
-    🔄 Your answer will be auto-submitted on the next switch!
-  </span>
+  <div class="warning-count" id="tabWarningCount">Warning 1 of 2</div>
+  <span class="warning-sub" style="font-size: 14px; color: #ff6b6b;">🔄 Your answer will be auto-submitted on the next switch!</span>
 </div>
 
-<!-- PROCTORING CONSENT OVERLAY -->
 <div id="consentOverlay">
   <div>
     <h2>📷 Proctoring Required</h2>
@@ -343,31 +221,19 @@ body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85
   </div>
 </div>
 
-<!-- CAMERA PREVIEW -->
 <div id="camPreviewContainer">
   <video id="camPreview" autoplay muted playsinline></video>
   <button id="toggleCamPreview" onclick="toggleCamPreview()">🔄</button>
   <span id="recordingIndicator">● REC</span>
 </div>
 
-<!-- LANDING PAGE -->
 <div id="landingPage" class="colourful-welcome">
-  <h1>🏆 WELCOME TO CHIZ QUIZ SYSTEMS</h1>
-  <h2>ALL LEVELS QUIZ - 2026</h2>
-  <p style="font-size: 18px; margin-bottom: 10px;">Please select your role to continue:</p>
-  <select id="userRole" style="cursor: pointer; font-weight: bold; width: 60%; padding: 12px; border-radius: 8px; border: none; font-size: 16px; margin: 0 auto; display: block;">
-    <option value="none">-- Choose Here --</option>
-    <option value="participant">👨‍🔬 Login as Participant</option>
-    <option value="admin">🛠️ Login as Admin</option>
-  </select>
-  <br>
-  <button onclick="goToSelectedLogin()" style="background: white; color: #1976d2; font-weight: bold; font-size: 18px; padding: 14px 40px; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: all 0.3s ease; margin: 10px auto; display: block;">
-    Continue ➡
-  </button>
+  <h1>🏆 CHEESE QUIZ SYSTEM</h1>
+  <h2>National Round 2026</h2>
+  <p style="font-size: 18px; margin-bottom: 10px;">Enter your team credentials to begin.</p>
 </div>
 
-<!-- PARTICIPANT LOGIN -->
-<div id="login" class="login-box" style="display:none;">
+<div id="login" class="login-box">
   <h2 style="color: #1976d2;">Participant Login</h2>
   <input id="team" placeholder="Enter Team Name">
   <div style="position:relative; display:inline-block; width: 80%; max-width: 300px; margin: 10px auto;">
@@ -378,13 +244,9 @@ body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85
   Continue ➡
   </button>
   <span class="register-link" onclick="showRegistrationForm()">📝 Register New Account</span>
-  <button onclick="goBackToHome()" style="background: #ccc; color: black; font-size: 14px; padding: 10px 30px; border-radius: 8px; border: none; cursor: pointer; margin: 5px auto; display: block;">
-    ⬅ Back to Home
-  </button>
   <p id="loginMessage" style="font-size:18px; font-weight:bold; color:green; margin-top:15px;"></p>
 </div>
 
-<!-- REGISTRATION FORM -->
 <div id="registrationForm" class="login-box" style="display:none;">
   <h2 style="color: #f57c00;">Register New Account</h2>
   <input id="regTeam" placeholder="Choose Team Name">
@@ -402,59 +264,31 @@ body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85
   <p id="regMessage" style="font-size:18px; font-weight:bold; color:green; margin-top:15px;"></p>
 </div>
 
-<!-- ADMIN LOGIN -->
-<div id="adminLogin" class="login-box" style="display:none;">
-  <h2 style="color: #d32f2f;">Admin Login</h2>
-  <div style="position:relative; display:inline-block; width: 80%; max-width: 300px; margin: 10px auto;">
-    <input id="adminPassword" type="password" placeholder="Enter Admin Password" style="width: 100%;">
-    <span onclick="toggleAdminPassword()" style="position:absolute; right:12px; top:14px; cursor:pointer; font-size:20px;">👁️</span>
-  </div>
-  <button onclick="startAdmin()" style="background: #d32f2f; color: white; padding: 14px 40px; font-size: 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: all 0.3s ease; margin: 10px auto; display: block;">
-    Access Dashboard
-  </button>
-  <button onclick="goBackToHome()" style="background: #ccc; color: black; font-size: 14px; padding: 10px 30px; border-radius: 8px; border: none; cursor: pointer; margin: 5px auto; display: block;">
-    ⬅ Back to Home
-  </button>
-</div>
-
-<!-- CATEGORY SELECTION -->
 <div id="categorySelection" style="display:none; max-width: 800px; margin: 0 auto; padding: 20px; text-align: center;">
   <h2 style="color: #1976d2;">Select Your Quiz/Olympiad</h2>
   <p style="color: #666; margin-bottom: 20px;">Choose the category you want to participate in:</p>
   <div id="categoryList" class="category-selector"></div>
 </div>
 
-<!-- QUESTION BOARD -->
 <div id="board" style="display:none;">
   <h2 style="color: #1976d2;">CLICK ON THE QUESTION TO OPEN IT</h2>
   <hr style="border: 1px solid #ccc; margin: 20px 0;">
-
   <div class="board-toolbar">
     <div class="toolbar-group">
-      <button id="refreshBtn" onclick="triggerRefresh()" style="background: #1976d2; color: white;">
-        🔄 Refresh Board
-      </button>
-      <button id="toggleAnsweredBtn" onclick="toggleHideAnswered()" style="background: #546e7a; color: white;">
-        👁 Hide Answered
-      </button>
+      <button id="refreshBtn" onclick="triggerRefresh()" style="background: #1976d2; color: white;">🔄 Refresh Board</button>
+      <button id="toggleAnsweredBtn" onclick="toggleHideAnswered()" style="background: #546e7a; color: white;">👁 Hide Answered</button>
     </div>
     <div class="toolbar-group">
-      <button onclick="backToCategorySelection()" style="background: #f57c00; color: white;">
-        ⬅ Change Category
-      </button>
-      <button onclick="logoutStudent()" style="background: #d32f2f; color: white;">
-        🚪 Log Out
-      </button>
+      <button onclick="backToCategorySelection()" style="background: #f57c00; color: white;">⬅ Change Category</button>
+      <button onclick="logoutStudent()" style="background: #d32f2f; color: white;">🚪 Log Out</button>
     </div>
   </div>
-
   <div id="grid" class="grid"></div>
   <br>
   <h3>🏆 Live Leaderboard</h3>
   <div id="leaderboard"></div>
 </div>
 
-<!-- QUESTION BOX -->
 <div id="questionBox">
   <div id="questionImage" style="display:none;"></div>
   <div id="questionText"></div>
@@ -490,43 +324,190 @@ body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85
 
 <script>
 // ═══════════════════════════════════════════
-// CONFIGURATION – Replace with your deployed Web App URL
+// YOUR APPS SCRIPT WEB APP URL
 // ═══════════════════════════════════════════
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdIEoSOX7qamMsIapnCjIdHD-lK_Eww_j62N4CeHIs4Yw0O070unS7Pv0Jm4eT036tzg/exec";
+const APPS_SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_EXEC_URL_HERE";
 
 // ═══════════════════════════════════════════
-// JSONP CALL SERVER – Bypasses CORS
+// JSONP CALL SERVER (reads) — see WRITE_FUNCTIONS below for POST routing
 // ═══════════════════════════════════════════
-function callServer(functionName, ...args) {
+function callServerGET(functionName, args) {
   return new Promise(function(resolve, reject) {
+    if (!navigator.onLine) { reject(new Error('OFFLINE')); return; }
     const callbackName = 'jsonp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    
+    const timeout = setTimeout(function() { cleanup(); reject(new Error('Request timed out')); }, 15000);
+    function cleanup() { delete window[callbackName]; if (scriptTag.parentNode) document.body.removeChild(scriptTag); clearTimeout(timeout); }
     window[callbackName] = function(data) {
-      delete window[callbackName];
-      document.body.removeChild(scriptTag);
-      if (data.error) {
-        reject(new Error(data.error));
-      } else {
-        resolve(data.result);
-      }
+      cleanup();
+      if (data && data.error) reject(new Error(data.error)); else resolve(data.result);
     };
-    
     const params = new URLSearchParams();
     params.append('callback', callbackName);
     params.append('function', functionName);
     params.append('args', JSON.stringify(args));
-    
     const scriptTag = document.createElement('script');
     scriptTag.src = APPS_SCRIPT_URL + '?' + params.toString();
-    scriptTag.onerror = function() {
-      delete window[callbackName];
-      document.body.removeChild(scriptTag);
-      reject(new Error('Network error — check your Apps Script deployment'));
-    };
-    
+    scriptTag.onerror = function() { cleanup(); reject(new Error('Network error — check your Apps Script deployment')); };
     document.body.appendChild(scriptTag);
   });
 }
+function callServerPOST(functionName, args) {
+  if (!navigator.onLine) return Promise.reject(new Error('OFFLINE'));
+  return fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ function: functionName, args: args || [] })
+  }).then(function(r) { return r.json(); }).then(function(res) {
+    if (res && res.error) throw new Error(res.error);
+    return res.result;
+  });
+}
+// Uploads and anything carrying sensitive/large payloads (photos, audio,
+// passwords, answer text) go via POST so they aren't size-limited or
+// exposed in a URL/server log the way a JSONP GET would be.
+const WRITE_FUNCTIONS = new Set(['verifyTeam', 'submitAnswer', 'submitRegistration', 'saveProctoringSnapshot', 'saveProctoringAudio', 'logIntegrityEvent', 'syncOfflineData']);
+function callServer(functionName, ...args) {
+  return WRITE_FUNCTIONS.has(functionName) ? callServerPOST(functionName, args) : callServerGET(functionName, args);
+}
+
+// ═══════════════════════════════════════════
+// MODULE B: OFFLINE CACHE + SYNC
+// ═══════════════════════════════════════════
+const LS_ANSWERS_KEY = function() { return 'cheese_pending_answers_' + team; };
+const LS_ATTEMPT_KEY = function() { return 'cheese_attempt_id_' + team; };
+let offlineSince = null;
+let graceTimer = null;
+const GRACE_PERIOD_MS = 2 * 60 * 1000;
+
+function cacheQuestions(categoryId, data) {
+  try { localStorage.setItem('cheese_quiz_' + categoryId, JSON.stringify(data)); } catch (e) {}
+}
+function getCachedQuestions(categoryId) {
+  try { return JSON.parse(localStorage.getItem('cheese_quiz_' + categoryId) || 'null'); } catch (e) { return null; }
+}
+function getPendingAnswers() {
+  try { return JSON.parse(localStorage.getItem(LS_ANSWERS_KEY()) || '[]'); } catch (e) { return []; }
+}
+function savePendingAnswers(list) { localStorage.setItem(LS_ANSWERS_KEY(), JSON.stringify(list)); }
+function saveAnswerLocally(entry) {
+  const list = getPendingAnswers();
+  list.push(entry);
+  savePendingAnswers(list);
+}
+function getAttemptId() {
+  let id = localStorage.getItem(LS_ATTEMPT_KEY());
+  if (!id) {
+    id = (crypto.randomUUID ? crypto.randomUUID() : ('att_' + Date.now() + '_' + Math.random()));
+    localStorage.setItem(LS_ATTEMPT_KEY(), id);
+  }
+  return id;
+}
+function rotateAttemptId() { localStorage.removeItem(LS_ATTEMPT_KEY()); }
+
+// --- IndexedDB photo buffer (Module B3) ---
+let _idb = null;
+function openPhotoDB() {
+  return new Promise(function(resolve, reject) {
+    if (_idb) { resolve(_idb); return; }
+    const req = indexedDB.open('cheese_quiz_photos', 1);
+    req.onupgradeneeded = function() { req.result.createObjectStore('photos', { keyPath: 'id', autoIncrement: true }); };
+    req.onsuccess = function() { _idb = req.result; resolve(_idb); };
+    req.onerror = function() { reject(req.error); };
+  });
+}
+async function bufferPhoto(base64) {
+  try {
+    const db = await openPhotoDB();
+    const tx = db.transaction('photos', 'readwrite');
+    tx.objectStore('photos').add({ base64: base64, ts: Date.now() });
+  } catch (e) { console.error('Photo buffer failed', e); }
+}
+async function getBufferedPhotos() {
+  try {
+    const db = await openPhotoDB();
+    return new Promise(function(resolve) {
+      const tx = db.transaction('photos', 'readonly');
+      const req = tx.objectStore('photos').getAll();
+      req.onsuccess = function() { resolve(req.result || []); };
+      req.onerror = function() { resolve([]); };
+    });
+  } catch (e) { return []; }
+}
+async function clearBufferedPhotos() {
+  try {
+    const db = await openPhotoDB();
+    const tx = db.transaction('photos', 'readwrite');
+    tx.objectStore('photos').clear();
+  } catch (e) {}
+}
+
+// --- Offline / online UI (Module B4) ---
+function showOfflineBanner(grace) {
+  const b = document.getElementById('offlineBanner');
+  b.style.display = 'block';
+  b.className = grace ? 'grace' : '';
+  b.textContent = grace
+    ? '⚠️ Still offline — quiz will auto-lock soon if connection is not restored'
+    : '📡 Offline Mode: Your progress is being saved locally and will sync automatically once you reconnect.';
+}
+function hideOfflineBanner() { document.getElementById('offlineBanner').style.display = 'none'; }
+function showSyncPill(text) {
+  const p = document.getElementById('syncPill');
+  p.style.display = 'block'; p.textContent = text;
+  setTimeout(function() { p.style.display = 'none'; }, 4000);
+}
+
+window.addEventListener('offline', function() {
+  offlineSince = Date.now();
+  showOfflineBanner(false);
+  graceTimer = setTimeout(handleGracePeriodExpired, GRACE_PERIOD_MS);
+});
+window.addEventListener('online', function() {
+  offlineSince = null;
+  if (graceTimer) { clearTimeout(graceTimer); graceTimer = null; }
+  hideOfflineBanner();
+  if (team) syncOfflineData();
+});
+
+// Module B6: grace period — lock the quiz if still offline after 2 minutes
+function handleGracePeriodExpired() {
+  if (navigator.onLine) return;
+  showOfflineBanner(true);
+  if (currentQuestion && !submitted) {
+    const textBox = document.getElementById('textAnswer');
+    const ans = (textBox && textBox.style.display !== 'none' ? textBox.value : selectedAnswer) || 'NO ANSWER (offline grace period expired)';
+    saveAnswerLocally({ questionId: currentQuestion, categoryId: currentCategory, answer: ans, timestamp: new Date().toISOString() });
+    submitted = true;
+  }
+  lockQuizUI('📡 Connection Lost', 'You were offline for more than 2 minutes. Your answers so far have been saved locally and will sync automatically once you reconnect. Please contact an invigilator.');
+}
+
+// Module B5: push everything buffered locally once back online
+async function syncOfflineData() {
+  if (!team) return;
+  const pending = getPendingAnswers();
+  const photos = await getBufferedPhotos();
+  if (pending.length === 0 && photos.length === 0) return;
+  const attemptId = getAttemptId();
+  showSyncPill('🔄 Syncing ' + pending.length + ' answer(s), ' + photos.length + ' photo(s)...');
+  try {
+    const res = await callServer('syncOfflineData', team, attemptId, JSON.stringify(pending), JSON.stringify(photos.map(function(p) { return { base64: p.base64 }; })));
+    if (res && (res.success || res.alreadySynced)) {
+      savePendingAnswers([]);
+      await clearBufferedPhotos();
+      rotateAttemptId();
+      showSyncPill('✅ Synced successfully');
+      if (currentCategory) loadQuestionsForCategory(currentCategory);
+    } else {
+      showSyncPill('⚠️ Sync incomplete — will retry');
+    }
+  } catch (e) {
+    showSyncPill('❌ Sync failed — will retry when possible');
+  }
+}
+// Background safety net in case the 'online' event fires without listeners
+// being ready yet (e.g. right after page load on a flaky connection).
+setInterval(function() { if (navigator.onLine && team) syncOfflineData(); }, 20000);
 
 // ═══════════════════════════════════════════
 // GLOBAL VARIABLES
@@ -534,6 +515,8 @@ function callServer(functionName, ...args) {
 let proctoringActive = false;
 let mediaStream = null;
 let snapshotInterval = null;
+let cameraCheckInterval = null;
+let quizLocked = false;
 let audioRecorder = null;
 let audioChunks = [];
 let audioInterval = null;
@@ -552,7 +535,9 @@ let currentTimerId = null;
 let timerInterval = null;
 
 let tabSwitchEnabled = false;
-let tabSwitchCount = 0, tabWarningShown = false, autoSubmitted = false;
+let tabSwitchCount = 0;
+let tabWarningShown = false;
+let autoSubmitted = false;
 let systemInterval = null;
 
 // ═══════════════════════════════════════════
@@ -560,22 +545,24 @@ let systemInterval = null;
 // ═══════════════════════════════════════════
 document.addEventListener('keydown', function (e) {
   if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || (e.ctrlKey && e.key === 'u')) {
-    e.preventDefault(); return false;
+    e.preventDefault();
+    return false;
   }
   if (e.ctrlKey || e.metaKey) {
     const key = e.key.toLowerCase();
     if (key === 'c' || key === 'v' || key === 'x' || key === 'u') {
-      e.preventDefault(); return false;
+      e.preventDefault();
+      return false;
     }
   }
   const isEnter = (e.key === 'Enter' || e.code === 'Enter' || e.keyCode === 13);
   if ((e.ctrlKey || e.shiftKey) && isEnter) {
     const qbox = document.getElementById('questionBox');
     const isVisible = qbox && window.getComputedStyle(qbox).display !== 'none';
-    if (isVisible && typeof submitted !== 'undefined' && !submitted) {
+    if (isVisible && !submitted) {
       e.preventDefault();
       e.stopPropagation();
-      if (typeof submitAnswerUI === 'function') submitAnswerUI();
+      submitAnswerUI();
     }
   }
 });
@@ -613,7 +600,9 @@ function updateMathPreview() {
   preview.style.display = 'block';
   preview.innerHTML = '\\(' + text + '\\)';
   if (window.MathJax) {
-    MathJax.typesetPromise([preview]).catch(err => console.log('MathJax error:', err));
+    MathJax.typesetPromise([preview]).catch(function(err) {
+      console.log('MathJax error:', err);
+    });
   } else {
     preview.textContent = text;
   }
@@ -623,14 +612,18 @@ function showMathToolbar() {
   document.getElementById('mathToolbar').style.display = 'flex';
   document.getElementById('mathPreview').style.display = 'none';
   const ta = document.getElementById('textAnswer');
-  if (ta) ta.addEventListener('input', updateMathPreviewDebounced);
+  if (ta) {
+    ta.addEventListener('input', updateMathPreviewDebounced);
+  }
 }
 
 function hideMathToolbar() {
   document.getElementById('mathToolbar').style.display = 'none';
   document.getElementById('mathPreview').style.display = 'none';
   const ta = document.getElementById('textAnswer');
-  if (ta) ta.removeEventListener('input', updateMathPreviewDebounced);
+  if (ta) {
+    ta.removeEventListener('input', updateMathPreviewDebounced);
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -642,38 +635,41 @@ function requestProctoringPermission() {
 
 document.getElementById('consentAllowBtn').addEventListener('click', async function() {
   document.getElementById('consentOverlay').style.display = 'none';
-  try {
-    mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    proctoringActive = true;
-    
-    const video = document.getElementById('camPreview');
-    video.srcObject = mediaStream;
-    document.getElementById('camPreviewContainer').style.display = 'block';
-    
-    snapshotInterval = setInterval(captureAndUploadSnapshot, 10000);
-    startAudioRecording();
-    audioInterval = setInterval(() => {
-      stopAndUploadAudio();
-      startAudioRecording();
-    }, 30000);
-    
-    showCategoriesAfterLogin();
-  } catch (err) {
-    alert('Could not access camera/microphone: ' + err.message + '\n\nProctoring is required. Returning to home.');
-    denyProctoring();
-  }
+  runCameraGate();
 });
 
 document.getElementById('consentDenyBtn').addEventListener('click', function() {
-  alert('Proctoring is required for this quiz. Returning to home.');
-  denyProctoring();
+  document.getElementById('consentOverlay').style.display = 'none';
+  showCameraGate('Camera access is required for this quiz. Please click Retry and allow camera/microphone access when prompted.');
 });
 
-function denyProctoring() {
-  document.getElementById('consentOverlay').style.display = 'none';
-  stopProctoring();
-  goBackToHome();
+function showCameraGate(message) {
+  document.getElementById('cameraGate').style.display = 'block';
+  document.getElementById('cameraGateMsg').textContent = message;
 }
+
+async function runCameraGate() {
+  try {
+    mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    document.getElementById('cameraGate').style.display = 'none';
+    proctoringActive = true;
+    const video = document.getElementById('camPreview');
+    video.srcObject = mediaStream;
+    document.getElementById('camPreviewContainer').style.display = 'block';
+    snapshotInterval = setInterval(captureAndUploadSnapshot, 5000);
+    cameraCheckInterval = setInterval(checkCameraLive, 5000);
+    startAudioRecording();
+    audioInterval = setInterval(function() {
+      stopAndUploadAudio();
+      startAudioRecording();
+    }, 30000);
+    showCategoriesAfterLogin();
+  } catch (err) {
+    // A1: camera access denied — block quiz from loading, do not proceed
+    showCameraGate('Camera access is required to start. Please enable camera permissions in your browser and click Retry.');
+  }
+}
+function retryCameraCheck() { runCameraGate(); }
 
 function showCategoriesAfterLogin() {
   document.getElementById("categorySelection").style.display = "block";
@@ -683,7 +679,7 @@ function showCategoriesAfterLogin() {
 }
 
 function captureAndUploadSnapshot() {
-  if (!proctoringActive || !mediaStream) return;
+  if (!proctoringActive || !mediaStream || quizLocked) return;
   const video = document.getElementById('camPreview');
   if (!video.videoWidth) return;
   const canvas = document.createElement('canvas');
@@ -693,7 +689,20 @@ function captureAndUploadSnapshot() {
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
   const imageData = canvas.toDataURL('image/jpeg', 0.5);
   const base64 = imageData.split(',')[1];
-  callServer('saveProctoringSnapshot', team, base64).catch(e => console.error('Snapshot upload failed:', e));
+  if (navigator.onLine) {
+    callServer('saveProctoringSnapshot', team, base64).catch(function() { bufferPhoto(base64); });
+  } else {
+    bufferPhoto(base64);
+  }
+}
+
+// A2: live liveness check — every 5s, confirm the video track is actually
+// still on. If it isn't, this counts as tampering.
+function checkCameraLive() {
+  if (!proctoringActive || quizLocked) return;
+  const track = mediaStream && mediaStream.getVideoTracks()[0];
+  const ok = mediaStream && mediaStream.active && track && track.enabled && track.readyState === 'live';
+  if (!ok) triggerIntegrityViolation('Camera_Disabled', 'Camera track became inactive or was disabled.');
 }
 
 function startAudioRecording() {
@@ -707,16 +716,24 @@ function startAudioRecording() {
   } catch (e) {
     audioRecorder = new MediaRecorder(audioStream);
   }
-  audioRecorder.ondataavailable = e => {
+  audioRecorder.ondataavailable = function(e) {
     if (e.data.size > 0) audioChunks.push(e.data);
   };
-  audioRecorder.onstop = () => {
+  audioRecorder.onstop = function() {
     if (audioChunks.length > 0) {
       const blob = new Blob(audioChunks, { type: 'audio/webm' });
       const reader = new FileReader();
       reader.onloadend = function() {
         const base64 = reader.result.split(',')[1];
-        callServer('saveProctoringAudio', team, base64).catch(e => console.error('Audio upload failed:', e));
+        // Audio is only sent live; if offline it's skipped for this cycle
+        // rather than buffered (photos are the buffered evidence stream —
+        // see Module B3), since 30s webm blobs are too large to hold many
+        // of in IndexedDB during a long outage.
+        if (navigator.onLine) {
+          callServer('saveProctoringAudio', team, base64).catch(function(e) {
+            console.error('Audio upload failed:', e);
+          });
+        }
       };
       reader.readAsDataURL(blob);
       audioChunks = [];
@@ -733,18 +750,21 @@ function stopAndUploadAudio() {
 
 function toggleCamPreview() {
   const preview = document.getElementById('camPreviewContainer');
-  preview.style.display = (preview.style.display === 'none') ? 'block' : 'none';
+  if (preview.style.display === 'none') {
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
 }
 
 function stopProctoring() {
   proctoringActive = false;
   if (snapshotInterval) { clearInterval(snapshotInterval); snapshotInterval = null; }
+  if (cameraCheckInterval) { clearInterval(cameraCheckInterval); cameraCheckInterval = null; }
   if (audioInterval) { clearInterval(audioInterval); audioInterval = null; }
-  if (audioRecorder && audioRecorder.state === 'recording') {
-    audioRecorder.stop();
-  }
+  if (audioRecorder && audioRecorder.state === 'recording') audioRecorder.stop();
   if (mediaStream) {
-    mediaStream.getTracks().forEach(track => track.stop());
+    mediaStream.getTracks().forEach(function(track) { track.stop(); });
   }
   document.getElementById('camPreviewContainer').style.display = 'none';
   mediaStream = null;
@@ -773,10 +793,10 @@ function checkTimers() {
       if (currentQuestion === qid && !submitted) {
         document.getElementById("timerDisplay").innerHTML = "⏰ TIME UP";
         const textBox = document.getElementById("textAnswer");
-        if (textBox.style.display !== "none") {
-          if (textBox.value.trim() === "") textBox.value = "NO ANSWER";
-        } else {
-          if (selectedAnswer === "") selectedAnswer = "NO ANSWER";
+        if (textBox.style.display !== "none" && textBox.value.trim() === "") {
+          textBox.value = "NO ANSWER";
+        } else if (selectedAnswer === "") {
+          selectedAnswer = "NO ANSWER";
         }
         submitAnswerUI();
       }
@@ -811,96 +831,107 @@ function extractDriveFileId(input) {
 }
 
 // ═══════════════════════════════════════════
-// TAB SWITCH DETECTION
+// TAB SWITCH DETECTION (A3/A4)
 // ═══════════════════════════════════════════
 function enableTabDetection() {
   if (tabSwitchEnabled) return;
   tabSwitchEnabled = true;
   document.addEventListener('visibilitychange', onVisibilityChange);
 }
+
 function disableTabDetection() {
   tabSwitchEnabled = false;
   document.removeEventListener('visibilitychange', onVisibilityChange);
   document.getElementById('tabWarning').style.display = 'none';
   tabWarningShown = false;
 }
+
 function onVisibilityChange() {
-  if (!tabSwitchEnabled) return;
+  if (!tabSwitchEnabled || quizLocked) return;
   if (document.hidden) {
     tabSwitchCount++;
     tabWarningShown = true;
     const warningDiv = document.getElementById('tabWarning');
     const countSpan = document.getElementById('tabWarningCount');
     if (tabSwitchCount >= 2) {
-      countSpan.textContent = '⚠️ AUTO-SUBMITTING ON NEXT SWITCH!';
+      countSpan.textContent = '⚠️ AUTO-SUBMITTING NOW';
       countSpan.style.color = '#ff4444';
     } else {
-      countSpan.textContent = 'Warning ' + tabSwitchCount + ' of 1';
+      countSpan.textContent = 'Warning ' + tabSwitchCount + ' of 2';
     }
     warningDiv.style.display = 'block';
-    if (tabSwitchCount >= 2) autoSubmitOnTabSwitch();
+    if (tabSwitchCount >= 2) {
+      triggerIntegrityViolation('Tab_Switch_Limit', 'Student switched tabs/windows 2 times.');
+    }
   } else {
     if (tabWarningShown) {
-      setTimeout(() => {
+      setTimeout(function() {
         document.getElementById('tabWarning').style.display = 'none';
         tabWarningShown = false;
       }, 3000);
     }
   }
 }
-function autoSubmitOnTabSwitch() {
-  if (document.getElementById('questionBox').style.display === 'block' && !submitted && !autoSubmitted) {
-    autoSubmitted = true;
+
+// A4/A5: shared handler for any integrity violation (camera or tab-switch)
+// — auto-submits whatever's on screen, logs the event, and locks the quiz.
+function triggerIntegrityViolation(eventName, detail) {
+  if (quizLocked) return;
+  quizLocked = true;
+  autoSubmitted = true;
+  disableTabDetection();
+
+  if (currentQuestion && !submitted) {
+    const textBox = document.getElementById("textAnswer");
+    let ans;
+    if (textBox && textBox.style.display !== "none") ans = textBox.value || "NO ANSWER (auto-submitted)";
+    else ans = selectedAnswer || "NO ANSWER (auto-submitted)";
     if (currentQuestion) delete questionEndTimes[currentQuestion];
-    const textBox = document.getElementById('textAnswer');
-    let answer = textBox.style.display !== 'none' ? (textBox.value || 'No answer (tab switched - auto-submitted)') : (selectedAnswer || 'No answer selected (tab switched - auto-submitted)');
-    document.getElementById('result').innerHTML = '⏳ <strong>AUTO-SUBMITTED</strong> - You switched tabs.';
-    document.getElementById('result').className = 'result-box result-pending';
-    document.getElementById('result').style.display = 'block';
-    callServer('submitAnswer', team, currentCategory, currentQuestion, answer)
-      .then(() => {
-        submitted = true;
-        document.getElementById('submitBtn').disabled = true;
-        document.getElementById('submitBtn').innerHTML = '📤 Auto-Submitted';
-        loadLeaderboard(currentCategory);
-        loadQuestionsForCategory(currentCategory);
-      })
-      .catch(err => console.error('Auto-submit failed:', err));
+    if (navigator.onLine) {
+      callServer('submitAnswer', team, currentCategory, currentQuestion, ans).catch(function() {
+        saveAnswerLocally({ questionId: currentQuestion, categoryId: currentCategory, answer: ans, timestamp: new Date().toISOString() });
+      });
+    } else {
+      saveAnswerLocally({ questionId: currentQuestion, categoryId: currentCategory, answer: ans, timestamp: new Date().toISOString() });
+    }
+    submitted = true;
   }
+
+  if (navigator.onLine) {
+    callServer('logIntegrityEvent', team, currentCategory, eventName, detail).catch(function() {});
+  }
+  stopProctoring();
+  lockQuizUI('🚫 Quiz Submitted', 'Quiz submitted due to a camera/tab integrity violation: ' + detail);
+}
+
+function lockQuizUI(title, msg) {
+  quizLocked = true;
+  stopGlobalTimer();
+  document.getElementById('integrityLockTitle').textContent = title;
+  document.getElementById('integrityLockMsg').textContent = msg;
+  document.getElementById('integrityLock').style.display = 'block';
+  document.getElementById('questionBox').style.display = 'none';
+  document.getElementById('board').style.display = 'none';
 }
 
 // ═══════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════
-function goToSelectedLogin() {
-  const role = document.getElementById("userRole").value;
-  if (role === "participant") {
-    document.getElementById("landingPage").style.display = "none";
-    document.getElementById("login").style.display = "block";
-  } else if (role === "admin") {
-    document.getElementById("landingPage").style.display = "none";
-    document.getElementById("adminLogin").style.display = "block";
-  } else {
-    alert("Please select a role from the drop-down menu first.");
-  }
-}
 function goBackToHome() {
   stopGlobalTimer();
   disableTabDetection();
   hideMathToolbar();
   stopProctoring();
-  document.getElementById("login").style.display = "none";
-  document.getElementById("adminLogin").style.display = "none";
+  document.getElementById("login").style.display = "block";
   document.getElementById("registrationForm").style.display = "none";
   document.getElementById("board").style.display = "none";
   document.getElementById("questionBox").style.display = "none";
   document.getElementById("categorySelection").style.display = "none";
-  document.getElementById("landingPage").style.display = "block";
-  document.getElementById("userRole").value = "none";
   document.getElementById("team").value = '';
   document.getElementById("password").value = '';
   team = '';
 }
+
 function backToCategorySelection() {
   stopGlobalTimer();
   clearInterval(systemInterval);
@@ -911,14 +942,17 @@ function backToCategorySelection() {
   document.getElementById("categorySelection").style.display = "block";
   showCategorySelection();
 }
+
 function showRegistrationForm() {
   document.getElementById("login").style.display = "none";
   document.getElementById("registrationForm").style.display = "block";
 }
+
 function showLogin() {
   document.getElementById("registrationForm").style.display = "none";
   document.getElementById("login").style.display = "block";
 }
+
 function logoutStudent() {
   stopGlobalTimer();
   clearInterval(systemInterval);
@@ -935,55 +969,30 @@ function logoutStudent() {
 }
 
 // ═══════════════════════════════════════════
-// ADMIN LOGIN
-// ═══════════════════════════════════════════
-function startAdmin() {
-  const pass = document.getElementById("adminPassword").value.trim();
-  const btn = document.querySelector("#adminLogin button");
-  btn.disabled = true;
-  btn.innerHTML = "⏳ Verifying...";
-  btn.style.background = "orange";
-  callServer("verifyAdminPassword", pass)
-    .then(ok => {
-      if (ok) {
-        localStorage.setItem('jetsAdminAccess', 'granted');
-        localStorage.setItem('jetsAdminTimestamp', String(Date.now()));
-        sessionStorage.setItem('jetsAdminAccess', 'granted');
-        return callServer("getWebAppUrl");
-      } else {
-        throw new Error("Wrong password");
-      }
-    })
-    .then(url => {
-      window.top.location.href = url + "?page=admin";
-    })
-    .catch(error => {
-      btn.disabled = false;
-      btn.innerHTML = "Access Dashboard";
-      btn.style.background = "#d32f2f";
-      alert("Error: " + error.message);
-    });
-}
-
-// ═══════════════════════════════════════════
-// PARTICIPANT LOGIN (with proctoring check)
+// PARTICIPANT LOGIN
 // ═══════════════════════════════════════════
 function startQuiz() {
   team = document.getElementById("team").value.trim();
   const password = document.getElementById("password").value.trim();
   const startBtn = document.getElementById("startBtn");
-  startBtn.disabled = true; startBtn.innerHTML = "⏳ Checking..."; startBtn.style.background = "orange";
-  if(!team || !password){
+  startBtn.disabled = true;
+  startBtn.innerHTML = "⏳ Checking...";
+  startBtn.style.background = "orange";
+  if (!team || !password) {
     alert("Enter Team Name and Password");
-    startBtn.disabled = false; startBtn.innerHTML = "Continue"; startBtn.style.background = "#1976d2";
+    startBtn.disabled = false;
+    startBtn.innerHTML = "Continue";
+    startBtn.style.background = "#1976d2";
     return;
   }
   callServer("verifyTeam", team, password)
-    .then(res => {
-      if(!res.success){
+    .then(function(res) {
+      if (!res.success) {
         document.getElementById("loginMessage").innerHTML = "❌ " + res.message;
         document.getElementById("loginMessage").style.color = "red";
-        startBtn.disabled = false; startBtn.innerHTML = "Continue"; startBtn.style.background = "#1976d2";
+        startBtn.disabled = false;
+        startBtn.innerHTML = "Continue";
+        startBtn.style.background = "#1976d2";
         return;
       }
       document.getElementById("startBtn").innerHTML = "✔ Accepted";
@@ -992,17 +1001,18 @@ function startQuiz() {
       document.getElementById("loginMessage").innerHTML = "✔ ACCESS GRANTED";
       document.getElementById("login").style.display = "none";
       availableCategories = res.availableCategories || [];
-      
-      return callServer("getProctoringStatus").then(isProctoringOn => {
+      callServer("getProctoringStatus").then(function(isProctoringOn) {
         if (isProctoringOn) {
           requestProctoringPermission();
         } else {
           showCategoriesAfterLogin();
         }
-      });
+      }).catch(function() { showCategoriesAfterLogin(); });
     })
-    .catch(error => {
-      startBtn.disabled = false; startBtn.innerHTML = "Continue"; startBtn.style.background = "#1976d2";
+    .catch(function(error) {
+      startBtn.disabled = false;
+      startBtn.innerHTML = "Continue";
+      startBtn.style.background = "#1976d2";
       document.getElementById("loginMessage").innerHTML = "❌ Network error. Try again.";
       document.getElementById("loginMessage").style.color = "red";
     });
@@ -1016,10 +1026,15 @@ function submitRegistration() {
   const p = document.getElementById("regPass").value.trim();
   const l = document.getElementById("regLevel").value;
   const c = document.getElementById("regCategory").value;
-  if (!t || !p) { document.getElementById("regMessage").innerHTML = "❌ Please fill all fields."; return; }
+  if (!t || !p) {
+    document.getElementById("regMessage").innerHTML = "❌ Please fill all fields.";
+    return;
+  }
   callServer("submitRegistration", t, p, l, c)
-    .then(msg => document.getElementById("regMessage").innerHTML = msg)
-    .catch(err => document.getElementById("regMessage").innerHTML = "❌ Error: " + err.message);
+    .then(function(msg) {
+      document.getElementById("regMessage").innerHTML = msg;
+    })
+    .catch(function(e) { document.getElementById("regMessage").innerHTML = "❌ " + e.message; });
 }
 
 // ═══════════════════════════════════════════
@@ -1036,14 +1051,15 @@ function showCategorySelection() {
     const btn = document.createElement("button");
     btn.className = "category-btn";
     const icon = cat.type === 'Quiz' ? '📝' : '🏅';
-    btn.innerHTML = `${icon} ${cat.name}<span class="badge">${cat.level} • ${cat.type}</span>`;
+    btn.innerHTML = icon + ' ' + cat.name + '<span class="badge">' + cat.level + ' • ' + cat.type + '</span>';
     btn.onclick = function() { selectCategory(cat.id); };
     container.appendChild(btn);
   });
 }
+
 function selectCategory(categoryId) {
   currentCategory = categoryId;
-  document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.category-btn').forEach(function(btn) { btn.classList.remove('active'); });
   event.target.classList.add('active');
   document.getElementById("categorySelection").style.display = "none";
   document.getElementById("board").style.display = "block";
@@ -1063,47 +1079,59 @@ function toggleHideAnswered() {
 }
 
 // ═══════════════════════════════════════════
-// LOAD QUESTIONS FOR CATEGORY
+// LOAD QUESTIONS FOR CATEGORY (Module B1: cache to localStorage)
 // ═══════════════════════════════════════════
 function loadQuestionsForCategory(categoryId) {
+  loadLeaderboard(categoryId);
+  const render = function(data) {
+    cacheQuestions(categoryId, data);
+    renderQuestionGrid(data, categoryId);
+  };
   callServer("getQuestionsForCategory", team, categoryId)
-    .then(data => {
-      const grid = document.getElementById("grid");
-      grid.innerHTML = "";
-      loadLeaderboard(categoryId);
-      const refBtn = document.getElementById("refreshBtn");
-      if (refBtn) {
-        refBtn.disabled = false;
-        refBtn.innerHTML = "🔄 Refresh Board";
-        refBtn.style.background = "#1976d2";
+    .then(render)
+    .catch(function(error) {
+      const cached = getCachedQuestions(categoryId);
+      if (cached) { render(cached); showSyncPill('📴 Showing cached questions (offline)'); }
+      else {
+        alert("❌ " + error.message);
+        document.getElementById("board").style.display = "none";
+        document.getElementById("categorySelection").style.display = "block";
+        document.querySelectorAll('.category-btn').forEach(function(btn) { btn.classList.remove('active'); });
       }
-      data.forEach(function(q) {
-        if (hideAnswered && q.locked) return;
-        let btn = document.createElement("button");
-        btn.className = "question-btn";
-        btn.dataset.id = q.id;
-        btn.innerHTML = q.locked ? "✓ " + q.id : q.id;
-        btn.disabled = q.locked;
-        btn.onclick = function() {
-          if (btn.disabled) return;
-          if (currentQuestion && currentQuestion !== q.id && !submitted) {
-            const textBox = document.getElementById("textAnswer");
-            let ans = textBox.style.display !== "none" ? (textBox.value || "NO ANSWER") : (selectedAnswer || "NO ANSWER");
-            submitAnswerForTimer(ans);
-            delete questionEndTimes[currentQuestion];
-          }
-          hideMathToolbar();
-          openQuestion(q.id, categoryId);
-        };
-        grid.appendChild(btn);
-      });
-    })
-    .catch(error => {
-      alert("❌ " + error.message);
-      document.getElementById("board").style.display = "none";
-      document.getElementById("categorySelection").style.display = "block";
-      document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
     });
+}
+
+function renderQuestionGrid(data, categoryId) {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  const refBtn = document.getElementById("refreshBtn");
+  if (refBtn) {
+    refBtn.disabled = false;
+    refBtn.innerHTML = "🔄 Refresh Board";
+    refBtn.style.background = "#1976d2";
+  }
+  const pendingIds = new Set(getPendingAnswers().map(function(a) { return a.questionId; }));
+  data.forEach(function(q) {
+    const locallyAnswered = pendingIds.has(q.id);
+    if (hideAnswered && (q.locked || locallyAnswered)) return;
+    const btn = document.createElement("button");
+    btn.className = "question-btn";
+    btn.dataset.id = q.id;
+    btn.innerHTML = q.locked ? "✓ " + q.id : (locallyAnswered ? "⏳ " + q.id : q.id);
+    btn.disabled = q.locked;
+    btn.onclick = function() {
+      if (btn.disabled) return;
+      if (currentQuestion && currentQuestion !== q.id && !submitted) {
+        const textBox = document.getElementById("textAnswer");
+        const ans = textBox.style.display !== "none" ? (textBox.value || "NO ANSWER") : (selectedAnswer || "NO ANSWER");
+        if (navigator.onLine) callServer("submitAnswer", team, currentCategory, currentQuestion, ans).catch(function() {});
+        delete questionEndTimes[currentQuestion];
+      }
+      hideMathToolbar();
+      openQuestion(q.id, categoryId);
+    };
+    grid.appendChild(btn);
+  });
 }
 
 // ═══════════════════════════════════════════
@@ -1111,94 +1139,95 @@ function loadQuestionsForCategory(categoryId) {
 // ═══════════════════════════════════════════
 function startSystemListener() {
   function fetchState() {
-    callServer("getSystemState").then(state => {
+    callServer("getSystemState").then(function(state) {
       if (state.ActiveQuestion) {
-        let rawTarget = String(state.ActiveQuestion).trim().toUpperCase();
-        let targetList = rawTarget.split(",").map(item => item.trim());
-        document.querySelectorAll(".question-btn").forEach(btn => {
-          let btnId = String(btn.dataset.id).trim().toUpperCase();
-          let isMatched = targetList.some(target => btnId === target || btnId.replace("Q","") === target.replace("Q",""));
+        const rawTarget = String(state.ActiveQuestion).trim().toUpperCase();
+        const targetList = rawTarget.split(",").map(function(item) { return item.trim(); });
+        document.querySelectorAll(".question-btn").forEach(function(btn) {
+          const btnId = String(btn.dataset.id).trim().toUpperCase();
+          const isMatched = targetList.some(function(target) {
+            return btnId === target || btnId.replace("Q", "") === target.replace("Q", "");
+          });
           btn.style.display = (rawTarget === "ALL" || isMatched) ? "inline-block" : "none";
         });
       }
       document.getElementById("leaderboard").style.display = (state.ShowLeaderboard === "false") ? "none" : "block";
-    }).catch(e => console.error(e));
+    }).catch(function() { /* offline: keep last-known filtering */ });
   }
   fetchState();
   setInterval(fetchState, 5000);
 }
-function checkSystemState(){
-  callServer("getSystemState")
-    .then(state => {
-      const msg = document.getElementById("systemMessage");
-      const overlay = document.getElementById("pauseOverlay");
-      if (state.Status === "Emergency") {
-        stopGlobalTimer();
-        overlay.style.display = "block";
-        overlay.innerHTML = "🚨 EMERGENCY STOP – Quiz halted";
-        document.querySelectorAll("button").forEach(btn => btn.disabled = true);
-        document.getElementById("questionBox").style.display = "none";
-        document.getElementById("board").style.display = "none";
-        document.body.classList.add("banner-visible");
-        return;
-      }
-      if (state.QuizActive === "false") {
-        stopGlobalTimer();
-        overlay.style.display = "block";
-        overlay.innerHTML = "⏸ The quiz round has not started yet.";
-        document.querySelectorAll("button").forEach(btn => btn.disabled = true);
-        document.getElementById("questionBox").style.display = "none";
-        document.getElementById("board").style.display = "none";
-        document.body.classList.add("banner-visible");
-        return;
-      }
-      if (state.Status === "Paused") {
-        stopGlobalTimer();
-        overlay.style.display = "none";
-        msg.style.display = "block";
-        msg.style.background = "#d32f2f";
-        msg.style.color = "white";
-        msg.innerHTML = "⛔ <b>QUIZ PAUSED</b> | 📢 " + (state.Broadcast || "Waiting...");
-        document.querySelectorAll("button").forEach(btn => btn.disabled = true);
-        document.body.classList.add("banner-visible");
-        return;
-      }
+
+function checkSystemState() {
+  callServer("getSystemState").then(function(state) {
+    const msg = document.getElementById("systemMessage");
+    const overlay = document.getElementById("pauseOverlay");
+    if (state.Status === "Emergency") {
+      stopGlobalTimer();
+      overlay.style.display = "block";
+      overlay.innerHTML = "🚨 EMERGENCY STOP – Quiz halted";
+      document.querySelectorAll("button").forEach(function(btn) { btn.disabled = true; });
+      document.getElementById("questionBox").style.display = "none";
+      document.getElementById("board").style.display = "none";
+      document.body.classList.add("banner-visible");
+      return;
+    }
+    if (state.QuizActive === "false") {
+      stopGlobalTimer();
+      overlay.style.display = "block";
+      overlay.innerHTML = "⏸ The quiz round has not started yet.";
+      document.querySelectorAll("button").forEach(function(btn) { btn.disabled = true; });
+      document.getElementById("questionBox").style.display = "none";
+      document.getElementById("board").style.display = "none";
+      document.body.classList.add("banner-visible");
+      return;
+    }
+    if (state.Status === "Paused") {
+      stopGlobalTimer();
       overlay.style.display = "none";
-      document.querySelectorAll("button").forEach(btn => btn.disabled = false);
-      startGlobalTimer();
-      if (state.Broadcast && String(state.Broadcast).trim() !== "") {
-        msg.style.display = "block";
-        msg.style.background = "#ffeb3b";
-        msg.style.color = "black";
-        msg.innerHTML = "📢 " + state.Broadcast;
-        document.body.classList.add("banner-visible");
-      } else {
-        msg.style.display = "none";
-        document.body.classList.remove("banner-visible");
-      }
-    })
-    .catch(e => console.error(e));
+      msg.style.display = "block";
+      msg.style.background = "#d32f2f";
+      msg.style.color = "white";
+      msg.innerHTML = "⛔ <b>QUIZ PAUSED</b> | 📢 " + (state.Broadcast || "Waiting...");
+      document.querySelectorAll("button").forEach(function(btn) { btn.disabled = true; });
+      document.body.classList.add("banner-visible");
+      return;
+    }
+    overlay.style.display = "none";
+    document.querySelectorAll("button").forEach(function(btn) { btn.disabled = false; });
+    startGlobalTimer();
+    if (state.Broadcast && String(state.Broadcast).trim() !== "") {
+      msg.style.display = "block";
+      msg.style.background = "#ffeb3b";
+      msg.style.color = "black";
+      msg.innerHTML = "📢 " + state.Broadcast;
+      document.body.classList.add("banner-visible");
+    } else {
+      msg.style.display = "none";
+      document.body.classList.remove("banner-visible");
+    }
+  }).catch(function() { /* offline: leave last-known UI state, don't spam errors */ });
 }
 
 // ═══════════════════════════════════════════
 // LEADERBOARD
 // ═══════════════════════════════════════════
 function loadLeaderboard(categoryId) {
-  callServer("getLeaderboard", categoryId)
-    .then(data => {
-      let html = "<table><tr><th>Rank</th><th>Team</th><th>Score</th></tr>";
-      for(let i=0; i<data.length; i++){
-        const medal = i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : '';
-        html += `<tr><td style='padding:10px; font-weight: bold;'>${medal}${i+1}</td><td style='padding:10px; font-weight: bold;'>${data[i][0]}</td><td style='padding:10px; color: #388e3c; font-weight: bold;'>${data[i][1]}</td></tr>`;
-      }
-      html += "</table>";
-      document.getElementById("leaderboard").innerHTML = html;
-    })
-    .catch(e => console.error(e));
+  callServer("getLeaderboard", categoryId).then(function(data) {
+    let html = "<table><tr><th>Rank</th><th>Team</th><th>Score</th></tr>";
+    for (let i = 0; i < data.length; i++) {
+      const medal = i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : '';
+      html += '<tr><td style="padding:10px; font-weight: bold;">' + medal + (i + 1) + '</td>';
+      html += '<td style="padding:10px; font-weight: bold;">' + data[i][0] + '</td>';
+      html += '<td style="padding:10px; color: #388e3c; font-weight: bold; font-size: 18px;">' + data[i][1] + '</td></tr>';
+    }
+    html += "</table>";
+    document.getElementById("leaderboard").innerHTML = html;
+  }).catch(function() {});
 }
 
 // ═══════════════════════════════════════════
-// OPEN QUESTION
+// OPEN QUESTION (falls back to cached copy offline)
 // ═══════════════════════════════════════════
 function openQuestion(id, categoryId) {
   currentQuestion = id;
@@ -1206,14 +1235,12 @@ function openQuestion(id, categoryId) {
   submitted = false;
   autoSubmitted = false;
   hideMathToolbar();
-
   if (questionEndTimes[id] && Date.now() < questionEndTimes[id]) {
     currentTimerId = id;
     document.getElementById("questionBox").style.display = "block";
     document.getElementById("board").style.display = "none";
     return;
   }
-
   document.getElementById("questionImage").style.display = "none";
   document.getElementById("questionImage").innerHTML = "";
   document.getElementById("questionText").innerText = "";
@@ -1228,110 +1255,103 @@ function openQuestion(id, categoryId) {
   document.getElementById("submitBtn").innerHTML = "Submit Answer (Ctrl+Enter)";
   document.getElementById("submitBtn").style.background = "#1976d2";
   selectedAnswer = "";
-
   document.getElementById("questionBox").style.display = "block";
   document.getElementById("board").style.display = "none";
 
-  callServer("getQuestionForCategory", id, categoryId)
-    .then(q => {
-      const imageDiv = document.getElementById("questionImage");
-      if (q.image && q.image.trim() !== "") {
-        const extracted = extractDriveFileId(q.image.trim());
-        if (extracted && extracted.startsWith('http')) {
-          imageDiv.style.display = "block";
-          imageDiv.innerHTML = `<img src="${extracted}" alt="Question Image" style="max-width: 100%; max-height: 300px;">`;
-        } else if (extracted) {
-          imageDiv.style.display = "block";
-          imageDiv.innerHTML = `<div style="text-align:center; padding:20px;">⏳ Loading image...</div>`;
-          callServer("getImageData", extracted)
-            .then(result => {
-              if (result.success) imageDiv.innerHTML = `<img src="${result.dataUrl}" alt="Question Image" style="max-width: 100%; max-height: 300px;">`;
-              else imageDiv.innerHTML = `<div style="color:#d32f2f;">❌ Image not available</div>`;
-            })
-            .catch(e => imageDiv.innerHTML = `<div style="color:#d32f2f;">❌ Image loading error</div>`);
-        } else {
-          imageDiv.style.display = "none";
-        }
-      } else imageDiv.style.display = "none";
-
-      document.getElementById("questionText").innerText = q.question;
-      document.getElementById("pointsDisplay").innerHTML = "🏆 Points: " + q.maxScore;
-
-      const seconds = Number(q.time) || 30;
-      questionEndTimes[id] = Date.now() + (seconds * 1000);
-      currentTimerId = id;
-
-      const optionsDiv = document.getElementById("options");
-      optionsDiv.innerHTML = "";
-      selectedAnswer = "";
-      const questionType = String(q.type || "").trim().toUpperCase();
-
-      if (questionType === "MCQ"){
-        document.getElementById("textAnswer").style.display = "none";
-        document.getElementById("submitBtn").style.display = "block";
-        hideMathToolbar();
-        ["optionA", "optionB", "optionC", "optionD"].forEach(function(key){
-          if(q[key]){
-            let optBtn = document.createElement("button");
-            optBtn.innerHTML = q[key];
-            optBtn.onclick = function(){
-              document.querySelectorAll("#options button").forEach(b => b.classList.remove("selected"));
-              optBtn.classList.add("selected");
-              selectedAnswer = key.slice(-1).toUpperCase();
-            };
-            optionsDiv.appendChild(optBtn);
+  const render = function(q) {
+    const imageDiv = document.getElementById("questionImage");
+    if (q.image && q.image.trim() !== "") {
+      const extracted = extractDriveFileId(q.image.trim());
+      if (extracted && extracted.startsWith('http')) {
+        imageDiv.style.display = "block";
+        imageDiv.innerHTML = '<img src="' + extracted + '" alt="Question Image" style="max-width: 100%; max-height: 300px;">';
+      } else if (extracted) {
+        imageDiv.style.display = "block";
+        imageDiv.innerHTML = '<div style="text-align:center; padding:20px;">⏳ Loading image...</div>';
+        callServer("getImageData", extracted).then(function(result) {
+          if (result.success) {
+            imageDiv.innerHTML = '<img src="' + result.dataUrl + '" alt="Question Image" style="max-width: 100%; max-height: 300px;">';
+          } else {
+            imageDiv.innerHTML = '<div style="color:#d32f2f;">❌ Image not available</div>';
           }
-        });
+        }).catch(function() { imageDiv.innerHTML = '<div style="color:#d32f2f;">❌ Image not available offline</div>'; });
       } else {
-        document.getElementById("textAnswer").style.display = "block";
-        document.getElementById("submitBtn").style.display = "block";
-        document.getElementById("textAnswer").value = "";
-        showMathToolbar();
-        document.getElementById("textAnswer").focus();
-        const ta = document.getElementById("textAnswer");
-        ta.style.height = "auto";
-        ta.style.height = (ta.scrollHeight) + "px";
-        ta.addEventListener("input", function() {
-          this.style.height = "auto";
-          this.style.height = (this.scrollHeight) + "px";
-        });
+        imageDiv.style.display = "none";
       }
-    })
-    .catch(error => {
-      alert("❌ Network error. Returning to board.");
-      backToBoard();
+    } else {
+      imageDiv.style.display = "none";
+    }
+    document.getElementById("questionText").innerText = q.question;
+    document.getElementById("pointsDisplay").innerHTML = "🏆 Points: " + q.maxScore;
+    const seconds = Number(q.time) || 30;
+    questionEndTimes[id] = Date.now() + (seconds * 1000);
+    currentTimerId = id;
+    const optionsDiv = document.getElementById("options");
+    optionsDiv.innerHTML = "";
+    selectedAnswer = "";
+    const questionType = String(q.type || "").trim().toUpperCase();
+    if (questionType === "MCQ") {
+      document.getElementById("textAnswer").style.display = "none";
+      document.getElementById("submitBtn").style.display = "block";
+      hideMathToolbar();
+      ["optionA", "optionB", "optionC", "optionD"].forEach(function(key) {
+        if (q[key]) {
+          const optBtn = document.createElement("button");
+          optBtn.innerHTML = q[key];
+          optBtn.onclick = function() {
+            document.querySelectorAll("#options button").forEach(function(b) { b.classList.remove("selected"); });
+            optBtn.classList.add("selected");
+            selectedAnswer = key.slice(-1).toUpperCase();
+          };
+          optionsDiv.appendChild(optBtn);
+        }
+      });
+    } else {
+      document.getElementById("textAnswer").style.display = "block";
+      document.getElementById("submitBtn").style.display = "block";
+      document.getElementById("textAnswer").value = "";
+      showMathToolbar();
+      document.getElementById("textAnswer").focus();
+      const ta = document.getElementById("textAnswer");
+      ta.style.height = "auto";
+      ta.style.height = ta.scrollHeight + "px";
+      ta.addEventListener("input", function() {
+        this.style.height = "auto";
+        this.style.height = this.scrollHeight + "px";
+      });
+    }
+  };
+
+  callServer("getQuestionForCategory", id, categoryId)
+    .then(render)
+    .catch(function(error) {
+      const cached = getCachedQuestions(categoryId);
+      const q = cached && cached.find(function(x) { return x.id === id; });
+      if (q) { render(q); showSyncPill('📴 Offline — using cached question'); }
+      else { alert("❌ Network error and no offline copy available."); backToBoard(); }
     });
 }
 
 // ═══════════════════════════════════════════
-// SUBMIT ANSWER HELPERS
+// SUBMIT ANSWER (Module B2: offline-first save)
 // ═══════════════════════════════════════════
-function submitAnswerForTimer(answer) {
-  callServer("submitAnswer", team, currentCategory, currentQuestion, answer)
-    .then(() => { 
-      loadQuestionsForCategory(currentCategory); 
-      loadLeaderboard(currentCategory); 
-    })
-    .catch(e => console.error(e));
-}
-
 function submitAnswerUI() {
-  if(submitted) return;
+  if (submitted || quizLocked) return;
   submitted = true;
   const btn = document.getElementById("submitBtn");
   btn.disabled = true;
   btn.innerHTML = "⏳ Submitting...";
   btn.style.background = "orange";
-  
   if (currentQuestion) delete questionEndTimes[currentQuestion];
   currentTimerId = null;
   hideMathToolbar();
-
   let answer = "";
   const textBox = document.getElementById("textAnswer");
-  if(textBox.style.display !== "none") answer = textBox.value;
-  else answer = selectedAnswer;
-
+  if (textBox.style.display !== "none") {
+    answer = textBox.value;
+  } else {
+    answer = selectedAnswer;
+  }
   if (!answer || answer.trim() === "" || answer.trim() === "NO ANSWER") {
     if (answer.trim() !== "NO ANSWER") {
       document.getElementById("result").innerHTML = "⚠️ Please provide an answer before submitting.";
@@ -1345,31 +1365,36 @@ function submitAnswerUI() {
     }
   }
 
+  const entry = { questionId: currentQuestion, categoryId: currentCategory, answer: answer, timestamp: new Date().toISOString() };
+
+  if (!navigator.onLine) {
+    saveAnswerLocally(entry);
+    document.getElementById("result").innerHTML = "📴 <strong>Saved offline.</strong> Will submit automatically once you reconnect.";
+    document.getElementById("result").className = "result-box result-pending";
+    document.getElementById("result").style.display = "block";
+    btn.innerHTML = "📴 Saved Offline";
+    loadQuestionsForCategory(currentCategory);
+    return;
+  }
+
   callServer("submitAnswer", team, currentCategory, currentQuestion, answer)
-    .then(res => {
+    .then(function(res) {
       let resultHTML = "";
       if (res.duplicate) {
-        resultHTML = "⚠️ Question already answered.<br>";
-        resultHTML += "📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided");
+        resultHTML = "⚠️ Question already answered.<br>📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided");
         btn.innerHTML = "Rejected"; btn.style.background = "#d32f2f";
         document.getElementById("result").className = "result-box result-wrong";
       } else if (res.pending && res.aiGrading) {
-        resultHTML = "⏳ <strong>AI Grading in Progress...</strong><br>";
-        resultHTML += "📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>";
-        resultHTML += "✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
+        resultHTML = "⏳ <strong>AI Grading in Progress...</strong><br>📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
         btn.innerHTML = "⏳ Grading..."; btn.style.background = "#f57c00";
         document.getElementById("result").className = "result-box result-pending";
         startPollingForResult(team, currentCategory, currentQuestion);
       } else if (res.correct) {
-        resultHTML = "✅ <strong>CORRECT!</strong> +" + res.score + " Points<br>";
-        resultHTML += "📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>";
-        resultHTML += "✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
+        resultHTML = "✅ <strong>CORRECT!</strong> +" + res.score + " Points<br>📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
         btn.innerHTML = "✅ Correct!"; btn.style.background = "#388e3c";
         document.getElementById("result").className = "result-box result-correct";
       } else {
-        resultHTML = "❌ <strong>WRONG</strong><br>";
-        resultHTML += "📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>";
-        resultHTML += "✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
+        resultHTML = "❌ <strong>WRONG</strong><br>📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
         btn.innerHTML = "❌ Wrong"; btn.style.background = "#d32f2f";
         document.getElementById("result").className = "result-box result-wrong";
       }
@@ -1378,16 +1403,14 @@ function submitAnswerUI() {
       loadLeaderboard(currentCategory);
       loadQuestionsForCategory(currentCategory);
     })
-    .catch(error => {
-      submitted = false;
-      btn.disabled = false;
-      btn.innerHTML = "Submit Answer (Ctrl+Enter)";
-      btn.style.background = "#1976d2";
-      document.getElementById("result").innerHTML = "❌ Network error. Submission failed.";
-      document.getElementById("result").className = "result-box result-wrong";
+    .catch(function(error) {
+      // Network claimed to be online but the request still failed (flaky
+      // wifi) — don't lose the answer, fall back to the offline queue.
+      saveAnswerLocally(entry);
+      document.getElementById("result").innerHTML = "📴 Connection issue — saved locally, will retry automatically.";
+      document.getElementById("result").className = "result-box result-pending";
       document.getElementById("result").style.display = "block";
-      alert("Submission failed. Try again.");
-      loadQuestionsForCategory(currentCategory);
+      btn.innerHTML = "📴 Saved Offline";
     });
 }
 
@@ -1400,29 +1423,26 @@ function startPollingForResult(team, categoryId, qid) {
   if (pollInterval) clearInterval(pollInterval);
   pollInterval = setInterval(function() {
     attempts++;
-    callServer("getAIResult", team, categoryId, qid)
-      .then(result => {
-        if (result.completed) {
-          clearInterval(pollInterval);
-          let resultHTML = "";
-          if (result.correct) {
-            resultHTML = "✅ <strong>AI GRADING COMPLETE!</strong> +" + result.score + " Points<br>";
-            document.getElementById("result").className = "result-box result-correct";
-          } else {
-            resultHTML = "❌ <strong>AI GRADING COMPLETE!</strong><br>";
-            document.getElementById("result").className = "result-box result-wrong";
-          }
-          resultHTML += "📖 <strong>Correct Answer:</strong> " + (result.correctAnswer || "") + "<br>";
-          resultHTML += "✏️ <strong>Your Answer:</strong> " + (result.yourAnswer || "");
-          document.getElementById("result").innerHTML = resultHTML;
-          document.getElementById("result").style.display = "block";
-          const btn = document.getElementById("submitBtn");
-          btn.innerHTML = result.correct ? "✅ Correct!" : "❌ Wrong";
-          btn.style.background = result.correct ? "#388e3c" : "#d32f2f";
-          loadLeaderboard(categoryId);
+    callServer("getAIResult", team, categoryId, qid).then(function(result) {
+      if (result.completed) {
+        clearInterval(pollInterval);
+        let resultHTML = "";
+        if (result.correct) {
+          resultHTML = "✅ <strong>AI GRADING COMPLETE!</strong> +" + result.score + " Points<br>";
+          document.getElementById("result").className = "result-box result-correct";
+        } else {
+          resultHTML = "❌ <strong>AI GRADING COMPLETE!</strong><br>";
+          document.getElementById("result").className = "result-box result-wrong";
         }
-      })
-      .catch(e => console.error(e));
+        resultHTML += "📖 <strong>Correct Answer:</strong> " + (result.correctAnswer || "") + "<br>✏️ <strong>Your Answer:</strong> " + (result.yourAnswer || "");
+        document.getElementById("result").innerHTML = resultHTML;
+        document.getElementById("result").style.display = "block";
+        const btn = document.getElementById("submitBtn");
+        btn.innerHTML = result.correct ? "✅ Correct!" : "❌ Wrong";
+        btn.style.background = result.correct ? "#388e3c" : "#d32f2f";
+        loadLeaderboard(categoryId);
+      }
+    }).catch(function() { /* keep polling; network may be flaky */ });
     if (attempts >= maxAttempts) {
       clearInterval(pollInterval);
       document.getElementById("result").innerHTML += "<br><em style='color:#f57c00;'>⏳ AI grading taking longer than expected.</em>";
@@ -1445,11 +1465,10 @@ function backToBoard() {
 // PASSWORD TOGGLE & REFRESH
 // ═══════════════════════════════════════════
 function toggleParticipantPassword() {
-  document.getElementById("password").type = document.getElementById("password").type === "password" ? "text" : "password";
+  const p = document.getElementById("password");
+  p.type = p.type === "password" ? "text" : "password";
 }
-function toggleAdminPassword() {
-  document.getElementById("adminPassword").type = document.getElementById("adminPassword").type === "password" ? "text" : "password";
-}
+
 function triggerRefresh() {
   const btn = document.getElementById("refreshBtn");
   if (btn) {
@@ -1461,43 +1480,5 @@ function triggerRefresh() {
 }
 </script>
 
-<!-- Auto-close warning banner (Apps Script iframe) -->
-<script>
-(function() {
-  var style = document.createElement('style');
-  style.textContent = `#warning-bar, #docs-banner, .docs-banner, .gux-message-bar, iframe[src*="warning"] { display: none !important; }`;
-  document.head.appendChild(style);
-  function clickClose() {
-    var selectors = [
-      '#warning-bar [role="button"]', '#docs-banner [role="button"]',
-      '.docs-banner [role="button"]', '.gux-message-bar [role="button"]',
-      'div[aria-label*="close" i]', 'div[aria-label*="dismiss" i]',
-      'button[aria-label*="close" i]', 'button[aria-label*="dismiss" i]',
-      '.dismiss-button', '.close-button', '[data-tooltip="Close"]', '[title="Close"]',
-      '.goog-flat-menu-button'
-    ];
-    for (var i = 0; i < selectors.length; i++) {
-      var el = document.querySelector(selectors[i]);
-      if (el) { el.click(); return true; }
-    }
-    var all = document.querySelectorAll('*');
-    for (var j = 0; j < all.length; j++) {
-      if (all[j].children.length === 0 && (all[j].textContent.trim() === '×' || all[j].textContent.trim() === '✕')) {
-        all[j].click();
-        return true;
-      }
-    }
-    return false;
-  }
-  var attempts = 0, maxAttempts = 10;
-  var interval = setInterval(function() {
-    if (clickClose() || ++attempts >= maxAttempts) clearInterval(interval);
-  }, 200);
-  var observer = new MutationObserver(function() {
-    if (clickClose()) { observer.disconnect(); clearInterval(interval); }
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-})();
-</script>
 </body>
 </html>
