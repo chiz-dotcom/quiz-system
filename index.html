@@ -596,6 +596,32 @@ let tabWarningShown = false;
 let autoSubmitted = false;
 let systemInterval = null;
 
+// Flag to indicate if a question is currently open (for anti-clipboard)
+let questionActive = false;
+
+// ═══════════════════════════════════════════
+// ANTI-CLIPBOARD & CONTEXT MENU LOCK (when question is open)
+// ═══════════════════════════════════════════
+function preventClipboardActions(e) {
+  if (questionActive) {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }
+}
+document.addEventListener('contextmenu', preventClipboardActions);
+document.addEventListener('copy', preventClipboardActions);
+document.addEventListener('cut', preventClipboardActions);
+document.addEventListener('paste', preventClipboardActions);
+
+// Also specifically on the textarea to catch direct events
+const textAnswerEl = document.getElementById('textAnswer');
+if (textAnswerEl) {
+  textAnswerEl.addEventListener('copy', preventClipboardActions);
+  textAnswerEl.addEventListener('cut', preventClipboardActions);
+  textAnswerEl.addEventListener('paste', preventClipboardActions);
+}
+
 // ═══════════════════════════════════════════
 // KEYBOARD SHORTCUTS & PROTECTION
 // ═══════════════════════════════════════════
@@ -604,6 +630,7 @@ document.addEventListener('keydown', function (e) {
     e.preventDefault();
     return false;
   }
+  // Block Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+U globally (redundant but safe)
   if (e.ctrlKey || e.metaKey) {
     const key = e.key.toLowerCase();
     if (key === 'c' || key === 'v' || key === 'x' || key === 'u') {
@@ -992,6 +1019,7 @@ function triggerIntegrityViolation(eventName, detail) {
 function lockQuizUI(title, msg) {
   quizLocked = true;
   stopGlobalTimer();
+  questionActive = false; // no question is active anymore
   document.getElementById('integrityLockTitle').textContent = title;
   document.getElementById('integrityLockMsg').textContent = msg;
   document.getElementById('integrityLock').style.display = 'block';
@@ -1007,6 +1035,7 @@ function goBackToHome() {
   disableTabDetection();
   hideMathToolbar();
   stopProctoring();
+  questionActive = false; // question closed
   document.getElementById("landingPage").style.display = "block";
   document.getElementById("login").style.display = "block";
   document.getElementById("registrationForm").style.display = "none";
@@ -1028,6 +1057,7 @@ function backToCategorySelection() {
   clearInterval(systemInterval);
   disableTabDetection();
   hideMathToolbar();
+  questionActive = false; // question closed
   document.getElementById("board").style.display = "none";
   document.getElementById("questionBox").style.display = "none";
   document.getElementById("categorySelection").style.display = "block";
@@ -1050,6 +1080,7 @@ function logoutStudent() {
   disableTabDetection();
   hideMathToolbar();
   stopProctoring();
+  questionActive = false;
   document.getElementById("board").style.display = "none";
   document.getElementById("questionBox").style.display = "none";
   document.getElementById("categorySelection").style.display = "none";
@@ -1326,6 +1357,9 @@ function openQuestion(id, categoryId) {
   submitted = false;
   autoSubmitted = false;
   hideMathToolbar();
+
+  // Activate anti-clipboard lock
+  questionActive = true;
 
   // Hide all question UI elements initially
   document.getElementById("questionText").innerText = "";
@@ -1604,6 +1638,7 @@ function startPollingForResult(team, categoryId, qid) {
 // BACK TO BOARD
 // ═══════════════════════════════════════════
 function backToBoard() {
+  questionActive = false; // deactivate anti-clipboard lock
   document.getElementById("questionBox").style.display = "none";
   document.getElementById("board").style.display = "block";
   loadQuestionsForCategory(currentCategory);
@@ -1630,4 +1665,4 @@ function triggerRefresh() {
 </script>
 
 </body>
-</html>f
+</html>
