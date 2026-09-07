@@ -14,17 +14,19 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
   margin: 0; padding: 0;
+  padding-top: max(16px, env(safe-area-inset-top));
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(-45deg, #1976d2, #388e3c, #fbc02d, #d32f2f);
   background-size: 400% 400%;
   animation: gradientBG 12s ease infinite;
   min-height: 100vh;
+  overflow-y: auto;
   -webkit-user-select: none;
   user-select: none;
 }
 button:active { transform: scale(0.95); opacity: 0.9; transition: transform 0.1s, opacity 0.1s; }
 
-.colourful-welcome { background: rgba(255,255,255,0.85); color: #333; padding: 40px 20px; border-radius: 15px; max-width: 700px; margin: 0 auto; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.colourful-welcome { background: rgba(255,255,255,0.85); color: #333; padding: 40px 20px; border-radius: 15px; max-width: 700px; margin: 20px auto; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 .colourful-welcome h1 { font-size: 28px; }
 .colourful-welcome h2 { font-size: 20px; }
 @keyframes gradientBG {
@@ -52,6 +54,11 @@ button:active { transform: scale(0.95); opacity: 0.9; transition: transform 0.1s
 .question-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15); filter: brightness(1.05); }
 .question-btn:active:not(:disabled) { transform: scale(0.92) translateY(1px); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); filter: brightness(0.95); }
 .question-btn:disabled { background: #4caf50; color: #ffffff; opacity: 0.85; cursor: not-allowed; box-shadow: none; transform: none; }
+.question-btn.pending-sync {
+  background: #fff3e0; color: #e65100; border: 2px solid #ff9800;
+  box-shadow: 0 3px 8px rgba(255,152,0,0.35);
+}
+.question-btn.pending-sync:hover:not(:disabled) { filter: brightness(1.05); }
 
 #board { display: none; }
 #questionBox {
@@ -126,7 +133,8 @@ button:active { transform: scale(0.95); opacity: 0.9; transition: transform 0.1s
 
 #consentOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999999; color: white; text-align: center; padding-top: 15%; display: none; }
 #consentOverlay > div { background: #222; display: inline-block; padding: 30px; border-radius: 15px; max-width: 500px; }
-#camPreviewContainer { position: fixed; top: 10px; right: 10px; z-index: 99998; border: 2px solid #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3); background: #000; transition: all 0.3s; display: none; }
+#camPreviewContainer { position: fixed; top: 10px; right: 10px; z-index: 99998; border: 2px solid #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3); background: #000; transition: box-shadow 0.2s; display: none; cursor: move; touch-action: none; }
+#camPreviewContainer.dragging { box-shadow: 0 6px 18px rgba(0,0,0,0.5); }
 #camPreview { width: 160px; height: 120px; object-fit: cover; }
 #toggleCamPreview { position: absolute; bottom: 2px; right: 2px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 4px; font-size: 10px; cursor: pointer; }
 #recordingIndicator { position: absolute; top: 2px; left: 2px; color: red; font-size: 12px; background: rgba(0,0,0,0.5); padding: 2px 4px; border-radius: 4px; }
@@ -228,8 +236,8 @@ body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85
 </div>
 
 <div id="landingPage" class="colourful-welcome">
-  <h1>🏆 CHEESE QUIZ SYSTEM</h1>
-  <h2>National Round 2026</h2>
+  <h1>🏆 CHIZ QUIZ SYSTEM</h1>
+  <h2>For Quiz and Written Answers</h2>
   <p style="font-size: 18px; margin-bottom: 10px;">Enter your team credentials to begin.</p>
 </div>
 
@@ -384,17 +392,17 @@ function callServer(functionName, ...args) {
 // ═══════════════════════════════════════════
 // MODULE B: OFFLINE CACHE + SYNC
 // ═══════════════════════════════════════════
-const LS_ANSWERS_KEY = function() { return 'cheese_pending_answers_' + team; };
-const LS_ATTEMPT_KEY = function() { return 'cheese_attempt_id_' + team; };
+const LS_ANSWERS_KEY = function() { return 'chiz_pending_answers_' + team; };
+const LS_ATTEMPT_KEY = function() { return 'chiz_attempt_id_' + team; };
 let offlineSince = null;
 let graceTimer = null;
 const GRACE_PERIOD_MS = 2 * 60 * 1000;
 
 function cacheQuestions(categoryId, data) {
-  try { localStorage.setItem('cheese_quiz_' + categoryId, JSON.stringify(data)); } catch (e) {}
+  try { localStorage.setItem('chiz_quiz_' + categoryId, JSON.stringify(data)); } catch (e) {}
 }
 function getCachedQuestions(categoryId) {
-  try { return JSON.parse(localStorage.getItem('cheese_quiz_' + categoryId) || 'null'); } catch (e) { return null; }
+  try { return JSON.parse(localStorage.getItem('chiz_quiz_' + categoryId) || 'null'); } catch (e) { return null; }
 }
 function getPendingAnswers() {
   try { return JSON.parse(localStorage.getItem(LS_ANSWERS_KEY()) || '[]'); } catch (e) { return []; }
@@ -420,7 +428,7 @@ let _idb = null;
 function openPhotoDB() {
   return new Promise(function(resolve, reject) {
     if (_idb) { resolve(_idb); return; }
-    const req = indexedDB.open('cheese_quiz_photos', 1);
+    const req = indexedDB.open('chiz_quiz_photos', 1);
     req.onupgradeneeded = function() { req.result.createObjectStore('photos', { keyPath: 'id', autoIncrement: true }); };
     req.onsuccess = function() { _idb = req.result; resolve(_idb); };
     req.onerror = function() { reject(req.error); };
@@ -767,6 +775,47 @@ function toggleCamPreview() {
     preview.style.display = 'none';
   }
 }
+
+// Draggable camera preview — lets the student move it out of the way of
+// the question text without losing the required camera monitoring.
+(function enableCamPreviewDrag() {
+  const el = document.getElementById('camPreviewContainer');
+  let dragging = false, offsetX = 0, offsetY = 0;
+
+  el.addEventListener('pointerdown', function(e) {
+    if (e.target.id === 'toggleCamPreview') return; // let the toggle button click through
+    dragging = true;
+    el.classList.add('dragging');
+    const rect = el.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+    // Switch from right-anchored to left/top-anchored positioning once
+    // the user starts dragging, so it can move freely.
+    el.style.left = rect.left + 'px';
+    el.style.top = rect.top + 'px';
+    el.style.right = 'auto';
+    el.setPointerCapture(e.pointerId);
+  });
+
+  el.addEventListener('pointermove', function(e) {
+    if (!dragging) return;
+    const maxLeft = window.innerWidth - el.offsetWidth;
+    const maxTop = window.innerHeight - el.offsetHeight;
+    const newLeft = Math.max(0, Math.min(e.clientX - offsetX, maxLeft));
+    const newTop = Math.max(0, Math.min(e.clientY - offsetY, maxTop));
+    el.style.left = newLeft + 'px';
+    el.style.top = newTop + 'px';
+  });
+
+  function stopDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+    el.classList.remove('dragging');
+    try { el.releasePointerCapture(e.pointerId); } catch (err) {}
+  }
+  el.addEventListener('pointerup', stopDrag);
+  el.addEventListener('pointercancel', stopDrag);
+})();
 
 function stopProctoring() {
   proctoringActive = false;
@@ -1126,7 +1175,7 @@ function renderQuestionGrid(data, categoryId) {
     const locallyAnswered = pendingIds.has(q.id);
     if (hideAnswered && (q.locked || locallyAnswered)) return;
     const btn = document.createElement("button");
-    btn.className = "question-btn";
+    btn.className = "question-btn" + (locallyAnswered && !q.locked ? " pending-sync" : "");
     btn.dataset.id = q.id;
     btn.innerHTML = q.locked ? "✓ " + q.id : (locallyAnswered ? "⏳ " + q.id : q.id);
     btn.disabled = q.locked;
