@@ -95,7 +95,6 @@ button:active { transform: scale(0.95); opacity: 0.9; transition: transform 0.1s
 
 #answerArea { margin-top: 16px; border-top: 1px solid #eee; padding-top: 16px; }
 
-/* --- MATH TOOLBAR --- */
 .math-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -184,7 +183,6 @@ button:active { transform: scale(0.95); opacity: 0.9; transition: transform 0.1s
 
 .register-link { display: block; margin: 15px auto; color: #1976d2; text-decoration: underline; cursor: pointer; font-size: 16px; }
 
-/* --- COMPACT TOOLBAR --- */
 .board-toolbar {
   display: flex;
   justify-content: space-between;
@@ -228,7 +226,6 @@ button:active { transform: scale(0.95); opacity: 0.9; transition: transform 0.1s
   filter: brightness(0.95);
 }
 
-/* Proctoring consent overlay */
 #consentOverlay {
   position: fixed;
   top: 0; left: 0;
@@ -248,7 +245,6 @@ button:active { transform: scale(0.95); opacity: 0.9; transition: transform 0.1s
   max-width: 500px;
 }
 
-/* Camera preview container */
 #camPreviewContainer {
   position: fixed;
   top: 10px;
@@ -485,9 +481,9 @@ body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85
 
 <script>
 // ═══════════════════════════════════════════
-// YOUR APPS SCRIPT WEB APP URL (Replace with your own)
+// CONFIGURATION – Replace with your deployed Web App URL
 // ═══════════════════════════════════════════
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdIEoSOX7qamMsIapnCjIdHD-lK_Eww_j62N4CeHIs4Yw0O070unS7Pv0Jm4eT036tzg/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx96EfOEGIznqfoS12_eqTo747971g8Hj62AG786pyPdUIfh_sPiWMWbxozSvYniXYWVA/exec";
 
 // ═══════════════════════════════════════════
 // JSONP CALL SERVER – Bypasses CORS
@@ -512,7 +508,7 @@ function callServer(functionName, ...args) {
     params.append('args', JSON.stringify(args));
     
     const scriptTag = document.createElement('script');
-    scriptTag.src = https://script.google.com/macros/s/AKfycbx96EfOEGIznqfoS12_eqTo747971g8Hj62AG786pyPdUIfh_sPiWMWbxozSvYniXYWVA/exec + '?' + params.toString();
+    scriptTag.src = APPS_SCRIPT_URL + '?' + params.toString();
     scriptTag.onerror = function() {
       delete window[callbackName];
       document.body.removeChild(scriptTag);
