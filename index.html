@@ -111,6 +111,7 @@ button:active { transform: scale(0.95); opacity: 0.9; transition: transform 0.1s
 #timerDisplay { font-size: 26px; color: #e65100; font-weight: bold; text-align: center; margin: 8px 0; padding: 8px; background: #fff3e0; border-radius: 8px; }
 #questionImage img { max-width: 100%; max-height: 280px; border-radius: 8px; border: 1px solid #e0e0e0; padding: 4px; background: white; }
 #questionText { font-size: 22px; margin-bottom: 12px; color: #1a1a2e; line-height: 1.6; }
+#imageLoadingMsg { text-align: center; padding: 20px; color: #666; }
 
 #leaderboard table { margin: 15px auto; width: 90%; max-width: 600px; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 #leaderboard th { background: #263238; color: white; padding: 12px; font-weight: 600; }
@@ -299,6 +300,7 @@ body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85
 
 <div id="questionBox">
   <div id="questionImage" style="display:none;"></div>
+  <div id="imageLoadingMsg" style="display:none; text-align:center; padding:20px; color:#666;">⏳ Loading image...</div>
   <div id="questionText"></div>
   <div id="pointsDisplay"></div>
   <div id="timerDisplay">⏱ --</div>
@@ -381,9 +383,6 @@ function callServerPOST(functionName, args) {
     return res.result;
   });
 }
-// Uploads and anything carrying sensitive/large payloads (photos, audio,
-// passwords, answer text) go via POST so they aren't size-limited or
-// exposed in a URL/server log the way a JSONP GET would be.
 const WRITE_FUNCTIONS = new Set(['verifyTeam', 'submitAnswer', 'submitRegistration', 'saveProctoringSnapshot', 'saveProctoringAudio', 'logIntegrityEvent', 'syncOfflineData']);
 function callServer(functionName, ...args) {
   return WRITE_FUNCTIONS.has(functionName) ? callServerPOST(functionName, args) : callServerGET(functionName, args);
@@ -423,18 +422,17 @@ function getAttemptId() {
 }
 function rotateAttemptId() { localStorage.removeItem(LS_ATTEMPT_KEY()); }
 
-// --- IndexedDB photo buffer (Module B3) ---
+// --- IndexedDB stores ---
 let _idb = null;
 function openPhotoDB() {
   return new Promise(function(resolve, reject) {
     if (_idb) { resolve(_idb); return; }
-    const req = indexedDB.open('chiz_quiz_photos', 1);
+    const req = indexedDB.open('chiz_quiz_photos', 2);
     req.onupgradeneeded = function() {
       const db = req.result;
       if (!db.objectStoreNames.contains('photos')) {
         db.createObjectStore('photos', { keyPath: 'id', autoIncrement: true });
       }
-      // New store for question images
       if (!db.objectStoreNames.contains('questionImages')) {
         db.createObjectStore('questionImages', { keyPath: 'id' });
       }
@@ -469,7 +467,7 @@ async function clearBufferedPhotos() {
   } catch (e) {}
 }
 
-// --- Image caching for offline use ---
+// --- Image caching ---
 async function cacheQuestionImage(fileId, dataUrl) {
   try {
     const db = await openPhotoDB();
@@ -489,7 +487,7 @@ async function getCachedQuestionImage(fileId) {
   } catch (e) { return null; }
 }
 
-// --- Offline / online UI (Module B4) ---
+// --- Offline / online UI ---
 function showOfflineBanner(grace) {
   const b = document.getElementById('offlineBanner');
   b.style.display = 'block';
@@ -517,11 +515,9 @@ window.addEventListener('online', function() {
   showSyncPill('📶 Back online – syncing...');
   if (team) {
     syncOfflineData().then(function() {
-      // After sync, refresh board and leaderboard to show latest data
       if (currentCategory) {
         loadQuestionsForCategory(currentCategory);
         loadLeaderboard(currentCategory);
-        // If a question is currently open, reload its content (including fresh image)
         if (currentQuestion) {
           openQuestion(currentQuestion, currentCategory);
         }
@@ -533,7 +529,6 @@ window.addEventListener('online', function() {
   }
 });
 
-// Module B6: grace period — lock the quiz if still offline after 2 minutes
 function handleGracePeriodExpired() {
   if (navigator.onLine) return;
   showOfflineBanner(true);
@@ -546,7 +541,6 @@ function handleGracePeriodExpired() {
   lockQuizUI('📡 Connection Lost', 'You were offline for more than 2 minutes. Your answers so far have been saved locally and will sync automatically once you reconnect. Please contact an invigilator.');
 }
 
-// Module B5: push everything buffered locally once back online
 async function syncOfflineData() {
   if (!team) return;
   const pending = getPendingAnswers();
@@ -569,8 +563,6 @@ async function syncOfflineData() {
     showSyncPill('❌ Sync failed — will retry when possible');
   }
 }
-// Background safety net in case the 'online' event fires without listeners
-// being ready yet (e.g. right after page load on a flaky connection).
 setInterval(function() { if (navigator.onLine && team) syncOfflineData(); }, 20000);
 
 // ═══════════════════════════════════════════
@@ -729,14 +721,12 @@ async function runCameraGate() {
     }, 30000);
     showCategoriesAfterLogin();
   } catch (err) {
-    // A1: camera access denied — block quiz from loading, do not proceed
     showCameraGate('Camera access is required to start. Please enable camera permissions in your browser and click Retry.');
   }
 }
 function retryCameraCheck() { runCameraGate(); }
 
 function showCategoriesAfterLogin() {
-  // Hide the landing page banner after successful login
   document.getElementById("landingPage").style.display = "none";
   document.getElementById("categorySelection").style.display = "block";
   showCategorySelection();
@@ -762,8 +752,6 @@ function captureAndUploadSnapshot() {
   }
 }
 
-// A2: live liveness check — every 5s, confirm the video track is actually
-// still on. If it isn't, this counts as tampering.
 function checkCameraLive() {
   if (!proctoringActive || quizLocked) return;
   const track = mediaStream && mediaStream.getVideoTracks()[0];
@@ -791,10 +779,6 @@ function startAudioRecording() {
       const reader = new FileReader();
       reader.onloadend = function() {
         const base64 = reader.result.split(',')[1];
-        // Audio is only sent live; if offline it's skipped for this cycle
-        // rather than buffered (photos are the buffered evidence stream —
-        // see Module B3), since 30s webm blobs are too large to hold many
-        // of in IndexedDB during a long outage.
         if (navigator.onLine) {
           callServer('saveProctoringAudio', team, base64).catch(function(e) {
             console.error('Audio upload failed:', e);
@@ -823,21 +807,17 @@ function toggleCamPreview() {
   }
 }
 
-// Draggable camera preview — lets the student move it out of the way of
-// the question text without losing the required camera monitoring.
 (function enableCamPreviewDrag() {
   const el = document.getElementById('camPreviewContainer');
   let dragging = false, offsetX = 0, offsetY = 0;
 
   el.addEventListener('pointerdown', function(e) {
-    if (e.target.id === 'toggleCamPreview') return; // let the toggle button click through
+    if (e.target.id === 'toggleCamPreview') return;
     dragging = true;
     el.classList.add('dragging');
     const rect = el.getBoundingClientRect();
     offsetX = e.clientX - rect.left;
     offsetY = e.clientY - rect.top;
-    // Switch from right-anchored to left/top-anchored positioning once
-    // the user starts dragging, so it can move freely.
     el.style.left = rect.left + 'px';
     el.style.top = rect.top + 'px';
     el.style.right = 'auto';
@@ -938,7 +918,7 @@ function extractDriveFileId(input) {
 }
 
 // ═══════════════════════════════════════════
-// TAB SWITCH DETECTION (A3/A4)
+// TAB SWITCH DETECTION
 // ═══════════════════════════════════════════
 function enableTabDetection() {
   if (tabSwitchEnabled) return;
@@ -980,8 +960,6 @@ function onVisibilityChange() {
   }
 }
 
-// A4/A5: shared handler for any integrity violation (camera or tab-switch)
-// — auto-submits whatever's on screen, logs the event, and locks the quiz.
 function triggerIntegrityViolation(eventName, detail) {
   if (quizLocked) return;
   quizLocked = true;
@@ -1029,7 +1007,6 @@ function goBackToHome() {
   disableTabDetection();
   hideMathToolbar();
   stopProctoring();
-  // Show the landing page again
   document.getElementById("landingPage").style.display = "block";
   document.getElementById("login").style.display = "block";
   document.getElementById("registrationForm").style.display = "none";
@@ -1038,7 +1015,6 @@ function goBackToHome() {
   document.getElementById("categorySelection").style.display = "none";
   document.getElementById("team").value = '';
   document.getElementById("password").value = '';
-  // Reset login message and button state
   document.getElementById("loginMessage").innerHTML = '';
   const startBtn = document.getElementById("startBtn");
   startBtn.disabled = false;
@@ -1185,7 +1161,7 @@ function selectCategory(categoryId) {
 }
 
 // ═══════════════════════════════════════════
-// HIDE / SHOW ANSWERED QUESTIONS
+// HIDE / SHOW ANSWERED
 // ═══════════════════════════════════════════
 function toggleHideAnswered() {
   hideAnswered = !hideAnswered;
@@ -1194,7 +1170,7 @@ function toggleHideAnswered() {
 }
 
 // ═══════════════════════════════════════════
-// LOAD QUESTIONS FOR CATEGORY (Module B1: cache to localStorage)
+// LOAD QUESTIONS
 // ═══════════════════════════════════════════
 function loadQuestionsForCategory(categoryId) {
   loadLeaderboard(categoryId);
@@ -1267,7 +1243,7 @@ function startSystemListener() {
         });
       }
       document.getElementById("leaderboard").style.display = (state.ShowLeaderboard === "false") ? "none" : "block";
-    }).catch(function() { /* offline: keep last-known filtering */ });
+    }).catch(function() {});
   }
   fetchState();
   setInterval(fetchState, 5000);
@@ -1321,7 +1297,7 @@ function checkSystemState() {
       msg.style.display = "none";
       document.body.classList.remove("banner-visible");
     }
-  }).catch(function() { /* offline: leave last-known UI state, don't spam errors */ });
+  }).catch(function() {});
 }
 
 // ═══════════════════════════════════════════
@@ -1342,7 +1318,7 @@ function loadLeaderboard(categoryId) {
 }
 
 // ═══════════════════════════════════════════
-// OPEN QUESTION (falls back to cached copy offline, and caches images)
+// OPEN QUESTION (with image-first loading)
 // ═══════════════════════════════════════════
 function openQuestion(id, categoryId) {
   currentQuestion = id;
@@ -1350,14 +1326,8 @@ function openQuestion(id, categoryId) {
   submitted = false;
   autoSubmitted = false;
   hideMathToolbar();
-  if (questionEndTimes[id] && Date.now() < questionEndTimes[id]) {
-    currentTimerId = id;
-    document.getElementById("questionBox").style.display = "block";
-    document.getElementById("board").style.display = "none";
-    return;
-  }
-  document.getElementById("questionImage").style.display = "none";
-  document.getElementById("questionImage").innerHTML = "";
+
+  // Hide all question UI elements initially
   document.getElementById("questionText").innerText = "";
   document.getElementById("pointsDisplay").innerHTML = "";
   document.getElementById("timerDisplay").innerHTML = "⏱ ...";
@@ -1369,58 +1339,19 @@ function openQuestion(id, categoryId) {
   document.getElementById("submitBtn").disabled = false;
   document.getElementById("submitBtn").innerHTML = "Submit Answer (Ctrl+Enter)";
   document.getElementById("submitBtn").style.background = "#1976d2";
-  selectedAnswer = "";
-  document.getElementById("questionBox").style.display = "block";
-  document.getElementById("board").style.display = "none";
+  document.getElementById("answerArea").style.display = "none"; // hide until image is ready (or no image)
+  document.getElementById("questionImage").style.display = "none";
+  document.getElementById("imageLoadingMsg").style.display = "none";
 
-  const render = function(q) {
-    const imageDiv = document.getElementById("questionImage");
-    const handleImage = function(dataUrl) {
-      if (dataUrl) {
-        imageDiv.style.display = "block";
-        imageDiv.innerHTML = '<img src="' + dataUrl + '" alt="Question Image" style="max-width: 100%; max-height: 300px;">';
-      } else {
-        imageDiv.style.display = "block";
-        imageDiv.innerHTML = '<div style="color:#d32f2f; text-align:center; padding:20px;">❌ Image not available offline</div>';
-      }
-    };
+  // If the question is already timed out, reopen it fresh
+  if (questionEndTimes[id] && Date.now() < questionEndTimes[id]) {
+    // we might have an active timer, but we'll re-render anyway
+    // reset timer later
+  }
 
-    if (q.image && q.image.trim() !== "") {
-      const extracted = extractDriveFileId(q.image.trim());
-      if (extracted && extracted.startsWith('http')) {
-        imageDiv.style.display = "block";
-        imageDiv.innerHTML = '<img src="' + extracted + '" alt="Question Image" style="max-width: 100%; max-height: 300px;">';
-      } else if (extracted) {
-        imageDiv.style.display = "block";
-        imageDiv.innerHTML = '<div style="text-align:center; padding:20px;">⏳ Loading image...</div>';
-        // Try to load from cache first (even when online, we want to use cached if available to reduce requests)
-        getCachedQuestionImage(extracted).then(function(cachedDataUrl) {
-          if (cachedDataUrl) {
-            handleImage(cachedDataUrl);
-          } else {
-            // Not cached: fetch from server
-            callServer("getImageData", extracted).then(function(result) {
-              if (result.success) {
-                const dataUrl = result.dataUrl;
-                // Cache for offline use
-                cacheQuestionImage(extracted, dataUrl);
-                handleImage(dataUrl);
-              } else {
-                handleImage(null);
-              }
-            }).catch(function() {
-              // If fetch fails (offline), fallback to cached (already tried, but maybe error)
-              // Show offline message
-              handleImage(null);
-            });
-          }
-        });
-      } else {
-        imageDiv.style.display = "none";
-      }
-    } else {
-      imageDiv.style.display = "none";
-    }
+  const renderQuestion = function(q) {
+    // Now render the question UI (called after image is loaded or if no image)
+    document.getElementById("answerArea").style.display = "block"; // show answer area
     document.getElementById("questionText").innerText = q.question;
     document.getElementById("pointsDisplay").innerHTML = "🏆 Points: " + q.maxScore;
     const seconds = Number(q.time) || 30;
@@ -1460,20 +1391,100 @@ function openQuestion(id, categoryId) {
         this.style.height = this.scrollHeight + "px";
       });
     }
+    document.getElementById("questionBox").style.display = "block";
+    document.getElementById("board").style.display = "none";
+    // Re-trigger timer display
+    checkTimers();
   };
 
+  // Get question data
+  const onQuestionData = function(q) {
+    // Check if question has an image
+    const imageField = q.image && q.image.trim();
+    if (imageField) {
+      const extracted = extractDriveFileId(imageField);
+      if (extracted && !extracted.startsWith('http')) {
+        // Try to load image
+        document.getElementById("imageLoadingMsg").style.display = "block";
+        document.getElementById("imageLoadingMsg").innerHTML = "⏳ Loading image...";
+        // First check cache
+        getCachedQuestionImage(extracted).then(function(cachedDataUrl) {
+          if (cachedDataUrl) {
+            // Image found in cache – display it and render question
+            document.getElementById("imageLoadingMsg").style.display = "none";
+            document.getElementById("questionImage").style.display = "block";
+            document.getElementById("questionImage").innerHTML = '<img src="' + cachedDataUrl + '" alt="Question Image" style="max-width: 100%; max-height: 300px;">';
+            renderQuestion(q);
+          } else {
+            // Not in cache – try to fetch online (if online)
+            if (navigator.onLine) {
+              callServer("getImageData", extracted).then(function(result) {
+                if (result.success) {
+                  const dataUrl = result.dataUrl;
+                  cacheQuestionImage(extracted, dataUrl);
+                  document.getElementById("imageLoadingMsg").style.display = "none";
+                  document.getElementById("questionImage").style.display = "block";
+                  document.getElementById("questionImage").innerHTML = '<img src="' + dataUrl + '" alt="Question Image" style="max-width: 100%; max-height: 300px;">';
+                  renderQuestion(q);
+                } else {
+                  // Image fetch failed
+                  document.getElementById("imageLoadingMsg").innerHTML = '❌ Image not available. Please connect to a stable network and try again.';
+                  document.getElementById("imageLoadingMsg").style.display = "block";
+                  document.getElementById("questionBox").style.display = "block";
+                  document.getElementById("board").style.display = "none";
+                  // Do not render the question – only show the message
+                  document.getElementById("answerArea").style.display = "none";
+                }
+              }).catch(function() {
+                // Offline or network error
+                document.getElementById("imageLoadingMsg").innerHTML = '❌ Image not available. Please connect to a stable network and try again.';
+                document.getElementById("imageLoadingMsg").style.display = "block";
+                document.getElementById("questionBox").style.display = "block";
+                document.getElementById("board").style.display = "none";
+                document.getElementById("answerArea").style.display = "none";
+              });
+            } else {
+              // Offline and no cached image
+              document.getElementById("imageLoadingMsg").innerHTML = '📴 This question requires an image. Please connect to a stable network to view it.';
+              document.getElementById("imageLoadingMsg").style.display = "block";
+              document.getElementById("questionBox").style.display = "block";
+              document.getElementById("board").style.display = "none";
+              document.getElementById("answerArea").style.display = "none";
+            }
+          }
+        });
+        return; // wait for image
+      } else {
+        // Direct URL (http) – show directly without caching, but still render question
+        document.getElementById("questionImage").style.display = "block";
+        document.getElementById("questionImage").innerHTML = '<img src="' + extracted + '" alt="Question Image" style="max-width: 100%; max-height: 300px;">';
+        renderQuestion(q);
+        return;
+      }
+    } else {
+      // No image – render immediately
+      renderQuestion(q);
+    }
+  };
+
+  // Fetch question data
   callServer("getQuestionForCategory", id, categoryId)
-    .then(render)
+    .then(onQuestionData)
     .catch(function(error) {
       const cached = getCachedQuestions(categoryId);
       const q = cached && cached.find(function(x) { return x.id === id; });
-      if (q) { render(q); showSyncPill('📴 Offline — using cached question'); }
-      else { alert("❌ Network error and no offline copy available."); backToBoard(); }
+      if (q) {
+        onQuestionData(q);
+        showSyncPill('📴 Offline — using cached question');
+      } else {
+        alert("❌ Network error and no offline copy available.");
+        backToBoard();
+      }
     });
 }
 
 // ═══════════════════════════════════════════
-// SUBMIT ANSWER (Module B2: offline-first save)
+// SUBMIT ANSWER
 // ═══════════════════════════════════════════
 function submitAnswerUI() {
   if (submitted || quizLocked) return;
@@ -1544,8 +1555,6 @@ function submitAnswerUI() {
       loadQuestionsForCategory(currentCategory);
     })
     .catch(function(error) {
-      // Network claimed to be online but the request still failed (flaky
-      // wifi) — don't lose the answer, fall back to the offline queue.
       saveAnswerLocally(entry);
       document.getElementById("result").innerHTML = "📴 Connection issue — saved locally, will retry automatically.";
       document.getElementById("result").className = "result-box result-pending";
@@ -1582,7 +1591,7 @@ function startPollingForResult(team, categoryId, qid) {
         btn.style.background = result.correct ? "#388e3c" : "#d32f2f";
         loadLeaderboard(categoryId);
       }
-    }).catch(function() { /* keep polling; network may be flaky */ });
+    }).catch(function() {});
     if (attempts >= maxAttempts) {
       clearInterval(pollInterval);
       document.getElementById("result").innerHTML += "<br><em style='color:#f57c00;'>⏳ AI grading taking longer than expected.</em>";
@@ -1621,4 +1630,4 @@ function triggerRefresh() {
 </script>
 
 </body>
-</html>
+</html>f
