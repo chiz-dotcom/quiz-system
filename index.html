@@ -334,7 +334,7 @@ body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85
 // ═══════════════════════════════════════════
 // YOUR APPS SCRIPT WEB APP URL
 // ═══════════════════════════════════════════
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx96EfOEGIznqfoS12_eqTo747971g8Hj62AG786pyPdUIfh_sPiWMWbxozSvYniXYWVA/exec";
+const APPS_SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_EXEC_URL_HERE";
 if (APPS_SCRIPT_URL.includes('PASTE_YOUR')) {
   document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('loginMessage').innerHTML = '⚠️ Setup incomplete: paste your Apps Script /exec URL into APPS_SCRIPT_URL near the top of this file.';
@@ -429,7 +429,16 @@ function openPhotoDB() {
   return new Promise(function(resolve, reject) {
     if (_idb) { resolve(_idb); return; }
     const req = indexedDB.open('chiz_quiz_photos', 1);
-    req.onupgradeneeded = function() { req.result.createObjectStore('photos', { keyPath: 'id', autoIncrement: true }); };
+    req.onupgradeneeded = function() {
+      const db = req.result;
+      if (!db.objectStoreNames.contains('photos')) {
+        db.createObjectStore('photos', { keyPath: 'id', autoIncrement: true });
+      }
+      // New store for question images
+      if (!db.objectStoreNames.contains('questionImages')) {
+        db.createObjectStore('questionImages', { keyPath: 'id' });
+      }
+    };
     req.onsuccess = function() { _idb = req.result; resolve(_idb); };
     req.onerror = function() { reject(req.error); };
   });
@@ -460,6 +469,26 @@ async function clearBufferedPhotos() {
   } catch (e) {}
 }
 
+// --- Image caching for offline use ---
+async function cacheQuestionImage(fileId, dataUrl) {
+  try {
+    const db = await openPhotoDB();
+    const tx = db.transaction('questionImages', 'readwrite');
+    tx.objectStore('questionImages').put({ id: fileId, dataUrl: dataUrl, ts: Date.now() });
+  } catch (e) { console.error('Image cache failed', e); }
+}
+async function getCachedQuestionImage(fileId) {
+  try {
+    const db = await openPhotoDB();
+    return new Promise(function(resolve) {
+      const tx = db.transaction('questionImages', 'readonly');
+      const req = tx.objectStore('questionImages').get(fileId);
+      req.onsuccess = function() { resolve(req.result ? req.result.dataUrl : null); };
+      req.onerror = function() { resolve(null); };
+    });
+  } catch (e) { return null; }
+}
+
 // --- Offline / online UI (Module B4) ---
 function showOfflineBanner(grace) {
   const b = document.getElementById('offlineBanner');
@@ -485,7 +514,23 @@ window.addEventListener('online', function() {
   offlineSince = null;
   if (graceTimer) { clearTimeout(graceTimer); graceTimer = null; }
   hideOfflineBanner();
-  if (team) syncOfflineData();
+  showSyncPill('📶 Back online – syncing...');
+  if (team) {
+    syncOfflineData().then(function() {
+      // After sync, refresh board and leaderboard to show latest data
+      if (currentCategory) {
+        loadQuestionsForCategory(currentCategory);
+        loadLeaderboard(currentCategory);
+        // If a question is currently open, reload its content (including fresh image)
+        if (currentQuestion) {
+          openQuestion(currentQuestion, currentCategory);
+        }
+      }
+      showSyncPill('✅ Back online – data updated');
+    }).catch(function() {
+      showSyncPill('⚠️ Sync incomplete – will retry');
+    });
+  }
 });
 
 // Module B6: grace period — lock the quiz if still offline after 2 minutes
@@ -1297,7 +1342,7 @@ function loadLeaderboard(categoryId) {
 }
 
 // ═══════════════════════════════════════════
-// OPEN QUESTION (falls back to cached copy offline)
+// OPEN QUESTION (falls back to cached copy offline, and caches images)
 // ═══════════════════════════════════════════
 function openQuestion(id, categoryId) {
   currentQuestion = id;
@@ -1330,6 +1375,16 @@ function openQuestion(id, categoryId) {
 
   const render = function(q) {
     const imageDiv = document.getElementById("questionImage");
+    const handleImage = function(dataUrl) {
+      if (dataUrl) {
+        imageDiv.style.display = "block";
+        imageDiv.innerHTML = '<img src="' + dataUrl + '" alt="Question Image" style="max-width: 100%; max-height: 300px;">';
+      } else {
+        imageDiv.style.display = "block";
+        imageDiv.innerHTML = '<div style="color:#d32f2f; text-align:center; padding:20px;">❌ Image not available offline</div>';
+      }
+    };
+
     if (q.image && q.image.trim() !== "") {
       const extracted = extractDriveFileId(q.image.trim());
       if (extracted && extracted.startsWith('http')) {
@@ -1338,13 +1393,28 @@ function openQuestion(id, categoryId) {
       } else if (extracted) {
         imageDiv.style.display = "block";
         imageDiv.innerHTML = '<div style="text-align:center; padding:20px;">⏳ Loading image...</div>';
-        callServer("getImageData", extracted).then(function(result) {
-          if (result.success) {
-            imageDiv.innerHTML = '<img src="' + result.dataUrl + '" alt="Question Image" style="max-width: 100%; max-height: 300px;">';
+        // Try to load from cache first (even when online, we want to use cached if available to reduce requests)
+        getCachedQuestionImage(extracted).then(function(cachedDataUrl) {
+          if (cachedDataUrl) {
+            handleImage(cachedDataUrl);
           } else {
-            imageDiv.innerHTML = '<div style="color:#d32f2f;">❌ Image not available</div>';
+            // Not cached: fetch from server
+            callServer("getImageData", extracted).then(function(result) {
+              if (result.success) {
+                const dataUrl = result.dataUrl;
+                // Cache for offline use
+                cacheQuestionImage(extracted, dataUrl);
+                handleImage(dataUrl);
+              } else {
+                handleImage(null);
+              }
+            }).catch(function() {
+              // If fetch fails (offline), fallback to cached (already tried, but maybe error)
+              // Show offline message
+              handleImage(null);
+            });
           }
-        }).catch(function() { imageDiv.innerHTML = '<div style="color:#d32f2f;">❌ Image not available offline</div>'; });
+        });
       } else {
         imageDiv.style.display = "none";
       }
