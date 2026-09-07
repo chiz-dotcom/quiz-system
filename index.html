@@ -691,6 +691,8 @@ async function runCameraGate() {
 function retryCameraCheck() { runCameraGate(); }
 
 function showCategoriesAfterLogin() {
+  // Hide the landing page banner after successful login
+  document.getElementById("landingPage").style.display = "none";
   document.getElementById("categorySelection").style.display = "block";
   showCategorySelection();
   enableTabDetection();
@@ -982,6 +984,8 @@ function goBackToHome() {
   disableTabDetection();
   hideMathToolbar();
   stopProctoring();
+  // Show the landing page again
+  document.getElementById("landingPage").style.display = "block";
   document.getElementById("login").style.display = "block";
   document.getElementById("registrationForm").style.display = "none";
   document.getElementById("board").style.display = "none";
@@ -989,6 +993,12 @@ function goBackToHome() {
   document.getElementById("categorySelection").style.display = "none";
   document.getElementById("team").value = '';
   document.getElementById("password").value = '';
+  // Reset login message and button state
+  document.getElementById("loginMessage").innerHTML = '';
+  const startBtn = document.getElementById("startBtn");
+  startBtn.disabled = false;
+  startBtn.innerHTML = "Continue ➡";
+  startBtn.style.background = "#1976d2";
   team = '';
 }
 
