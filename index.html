@@ -326,7 +326,13 @@ body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85
 // ═══════════════════════════════════════════
 // YOUR APPS SCRIPT WEB APP URL
 // ═══════════════════════════════════════════
-const APPS_SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_EXEC_URL_HERE";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx96EfOEGIznqfoS12_eqTo747971g8Hj62AG786pyPdUIfh_sPiWMWbxozSvYniXYWVA/exec";
+if (APPS_SCRIPT_URL.includes('PASTE_YOUR')) {
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('loginMessage').innerHTML = '⚠️ Setup incomplete: paste your Apps Script /exec URL into APPS_SCRIPT_URL near the top of this file.';
+    document.getElementById('loginMessage').style.color = 'red';
+  });
+}
 
 // ═══════════════════════════════════════════
 // JSONP CALL SERVER (reads) — see WRITE_FUNCTIONS below for POST routing
@@ -357,7 +363,12 @@ function callServerPOST(functionName, args) {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({ function: functionName, args: args || [] })
-  }).then(function(r) { return r.json(); }).then(function(res) {
+  }).then(function(r) {
+    return r.text().then(function(text) {
+      try { return JSON.parse(text); }
+      catch (e) { throw new Error('Server did not return JSON (got: ' + text.slice(0, 80) + '...). Check the deployment URL and that "Who has access" is set to Anyone.'); }
+    });
+  }).then(function(res) {
     if (res && res.error) throw new Error(res.error);
     return res.result;
   });
@@ -1013,7 +1024,7 @@ function startQuiz() {
       startBtn.disabled = false;
       startBtn.innerHTML = "Continue";
       startBtn.style.background = "#1976d2";
-      document.getElementById("loginMessage").innerHTML = "❌ Network error. Try again.";
+      document.getElementById("loginMessage").innerHTML = "❌ " + (error && error.message ? error.message : "Could not reach the server.");
       document.getElementById("loginMessage").style.color = "red";
     });
 }
