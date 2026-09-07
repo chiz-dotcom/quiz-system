@@ -24,244 +24,75 @@ html, body {
 }
 button:active { transform: scale(0.95); opacity: 0.9; transition: transform 0.1s, opacity 0.1s; }
 
-.colourful-welcome { background: rgba(255,255,255,0.85); color: #333; padding: 40px 20px; border-radius: 15px; max-width: 700px; margin: 0 auto; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-.colourful-welcome h1 { font-size: 28px; }
-.colourful-welcome h2 { font-size: 20px; }
+.colourful-welcome {
+  background: rgba(255,255,255,0.85);
+  color: #333;
+  padding: 30px 15px;               /* reduced padding to avoid overflow */
+  border-radius: 15px;
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  overflow-wrap: break-word;        /* allow long words to wrap */
+  word-wrap: break-word;
+}
+.colourful-welcome h1 { font-size: 24px; margin-bottom: 5px; }   /* slightly smaller */
+.colourful-welcome h2 { font-size: 18px; margin-bottom: 15px; }  /* slightly smaller */
 @keyframes gradientBG {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
-.login-box { background: white; padding: 30px 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 500px; margin: 20px auto; text-align: center; }
-.login-box input, .login-box select { display: block; width: 80%; max-width: 300px; margin: 10px auto; padding: 14px 12px; font-size: 18px; border-radius: 8px; border: 1px solid #ccc; }
-.login-box button { margin: 10px auto; }
+/* ... rest of existing CSS ... */
 
-.category-selector { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin: 20px 0; }
-.category-btn { padding: 14px 24px; font-size: 16px; font-weight: bold; border-radius: 10px; border: 3px solid #e0e0e0; background: white; color: #333; cursor: pointer; min-width: 130px; }
-.category-btn.active { border-color: #1976d2; background: #e3f2fd; color: #1976d2; }
-.category-btn .badge { display: block; font-size: 12px; color: #999; margin-top: 4px; }
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.question-btn {
-  height: 48px;
-  font-size: 15px;
+/* === ANSWERED QUESTION HIGHLIGHT === */
+.question-btn.answered {
+  background: #2e7d32;               /* darker green */
+  border: 3px solid #1b5e20;        /* bold border */
+  box-shadow: 0 0 8px rgba(76,175,80,0.6);
+  color: #fff;
   font-weight: 700;
-  background: #1976d2;
-  color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
-  cursor: pointer;
-  outline: none;
-  border: none;
+  position: relative;
 }
-
-.question-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-  filter: brightness(1.05);
-}
-
-.question-btn:active:not(:disabled) {
-  transform: scale(0.92) translateY(1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  filter: brightness(0.95);
-}
-
-.question-btn:disabled {
-  background: #4caf50;
-  color: #ffffff;
-  opacity: 0.85;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-}
-
-#board { display: none; }
-
-#questionBox {
-  display: none; background: white; border-radius: 16px;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.08); padding: 20px; max-width: 800px; margin: 15px auto;
-  min-height: calc(100vh - 30px); max-height: calc(100vh - 30px); overflow-y: auto;
-}
-
-#answerArea { margin-top: 16px; border-top: 1px solid #eee; padding-top: 16px; }
-
-.math-toolbar {
+.question-btn.answered::after {
+  content: "✓";                     /* checkmark */
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #fff;
+  color: #2e7d32;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 10px;
-}
-.math-toolbar button {
-  background: #f0f4ff;
-  border: 1px solid #c3d9ff;
-  color: #1a3b6e;
-  padding: 6px 10px;
-  font-size: 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-  min-width: 36px;
-  font-family: 'Courier New', monospace;
-}
-.math-toolbar button:hover {
-  background: #dbeafe;
-  border-color: #1976d2;
-}
-.math-preview {
-  font-size: 16px;
-  padding: 8px 12px;
-  background: #f9f9ff;
-  border-radius: 8px;
-  min-height: 30px;
-  margin-bottom: 8px;
-  color: #333;
-  border: 1px dashed #ccc;
-  display: none;
-}
-
-#textAnswer {
-  width: 100%; padding: 12px 16px; font-size: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  border-radius: 12px; border: 2px solid #d0d0d0; resize: vertical; box-sizing: border-box;
-  min-height: 120px; max-height: none; overflow-y: auto; background: white; transition: border-color 0.3s, box-shadow 0.3s;
-  line-height: 1.5; color: #1a1a2e; outline: none;
-}
-#textAnswer:focus { border-color: #1976d2; box-shadow: 0 0 0 3px rgba(25,118,210,0.15); }
-#textAnswer::placeholder { color: #aaa; font-size: 14px; }
-
-#submitBtn {
-  background: #1976d2; color: white; padding: 12px 24px; font-size: 16px; font-weight: 600;
-  border-radius: 12px; border: none; cursor: pointer; transition: all 0.3s ease; margin-top: 12px; width: 100%;
-  box-shadow: 0 2px 8px rgba(25,118,210,0.25);
-}
-#submitBtn:hover:not(:disabled) { background: #1565c0; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(25,118,210,0.35); }
-#submitBtn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
-
-.btn-secondary { background: #f5f5f5; color: #333; padding: 12px 20px; font-size: 15px; font-weight: 600; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer; width: 100%; margin-top: 12px; }
-
-#result { padding: 12px 16px; border-radius: 12px; margin-top: 12px; font-size: 15px; line-height: 1.6; min-height: 50px; }
-.result-correct { background: #e8f5e9; border: 2px solid #4CAF50; color: #1b5e20; }
-.result-wrong { background: #ffebee; border: 2px solid #f44336; color: #b71c1c; }
-.result-pending { background: #fff3e0; border: 2px solid #FF9800; color: #e65100; }
-
-#options { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; }
-#options button { padding: 14px 18px; font-size: 16px; text-align: left; background: #f5f5f5; color: #333; border: 2px solid #e0e0e0; border-radius: 8px; width: 100%; }
-#options button.selected { background: #1976d2; color: white; border-color: #1976d2; }
-#pointsDisplay { font-size: 17px; color: #1976d2; margin-bottom: 8px; }
-#timerDisplay { font-size: 26px; color: #e65100; font-weight: bold; text-align: center; margin: 8px 0; padding: 8px; background: #fff3e0; border-radius: 8px; }
-#questionImage img { max-width: 100%; max-height: 280px; border-radius: 8px; border: 1px solid #e0e0e0; padding: 4px; background: white; }
-#questionText { font-size: 22px; margin-bottom: 12px; color: #1a1a2e; line-height: 1.6; }
-
-#leaderboard table { margin: 15px auto; width: 90%; max-width: 600px; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-#leaderboard th { background: #263238; color: white; padding: 12px; font-weight: 600; }
-#leaderboard td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; }
-
-#systemMessage {
-  display: none; background: #ffeb3b; color: black; padding: 15px; font-size: 20px; font-weight: bold;
-  position: fixed; top: 0; left: 0; width: 100%; z-index: 9999; border-bottom: 3px solid #ff9800; text-align: center;
-}
-#pauseOverlay {
-  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9);
-  color: white; font-size: 40px; font-weight: bold; z-index: 99999; padding-top: 200px; text-align: center; pointer-events: all; cursor: default;
-}
-#tabWarning {
-  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95);
-  color: #ff4444; font-size: 28px; font-weight: bold; z-index: 999999; padding-top: 250px; text-align: center;
-}
-#tabWarning span { display: block; font-size: 60px; margin-bottom: 20px; }
-#tabWarning .warning-sub { color: #ffaa00; font-size: 18px; font-weight: normal; margin-top: 20px; }
-#tabWarning .warning-count { color: #ffffff; font-size: 16px; font-weight: normal; margin-top: 15px; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; display: inline-block; }
-
-.register-link { display: block; margin: 15px auto; color: #1976d2; text-decoration: underline; cursor: pointer; font-size: 16px; }
-
-.board-toolbar {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  padding: 8px 12px;
-  gap: 8px;
-  margin: 10px 0 15px 0;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.toolbar-group {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.board-toolbar button,
-.toolbar-group button {
-  padding: 6px 12px !important;
-  font-size: 13px !important;
-  border-radius: 6px !important;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
-  cursor: pointer;
-  outline: none;
-  border: none;
-  font-weight: 600;
-}
-
-.board-toolbar button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-  filter: brightness(1.05);
-}
-
-.board-toolbar button:active {
-  transform: scale(0.92) translateY(1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  filter: brightness(0.95);
-}
-
-#consentOverlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.85);
-  z-index: 999999;
-  color: white;
-  text-align: center;
-  padding-top: 15%;
-  display: none;
-}
-#consentOverlay > div {
-  background: #222;
-  display: inline-block;
-  padding: 30px;
-  border-radius: 15px;
-  max-width: 500px;
-}
-
+/* === CAMERA PREVIEW – DRAGGABLE & ALWAYS ON TOP === */
 #camPreviewContainer {
   position: fixed;
   top: 10px;
   right: 10px;
-  z-index: 99998;
+  z-index: 9999999;                  /* extremely high, above everything */
   border: 2px solid #fff;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   background: #000;
-  transition: all 0.3s;
+  transition: none;                  /* remove transitions for dragging */
   display: none;
+  cursor: move;                      /* indicate draggable */
 }
 #camPreview {
   width: 160px;
   height: 120px;
   object-fit: cover;
+  display: block;
+  pointer-events: none;              /* allow drag on container only */
 }
 #toggleCamPreview {
   position: absolute;
@@ -273,6 +104,7 @@ button:active { transform: scale(0.95); opacity: 0.9; transition: transform 0.1s
   border-radius: 4px;
   font-size: 10px;
   cursor: pointer;
+  z-index: 2;
 }
 #recordingIndicator {
   position: absolute;
@@ -283,779 +115,79 @@ button:active { transform: scale(0.95); opacity: 0.9; transition: transform 0.1s
   background: rgba(0,0,0,0.5);
   padding: 2px 4px;
   border-radius: 4px;
+  z-index: 2;
 }
 
-body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85px); max-height: calc(100vh - 85px); }
-
-@media (max-width: 768px) {
-  body { padding: 8px; padding-top: 60px; }
-  #questionBox { padding: 14px; border-radius: 12px; }
-  #textAnswer { font-size: 15px; min-height: 70px; max-height: 150px; }
-  #submitBtn { font-size: 15px; padding: 12px 20px; }
-  .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .question-btn { height: 50px; font-size: 14px; }
-  .category-btn { padding: 12px 18px; font-size: 14px; min-width: 110px; }
-  .board-toolbar button { padding: 6px 10px; font-size: 12px; }
-}
-@media (max-width: 480px) {
-  body { padding: 4px; padding-top: 55px; }
-  #questionBox { padding: 10px; border-radius: 10px; }
-  #textAnswer { font-size: 14px; min-height: 60px; max-height: 120px; }
-  #submitBtn { font-size: 14px; padding: 10px 16px; }
-  .grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-  .question-btn { height: 44px; font-size: 13px; }
-}
+/* rest of CSS unchanged ... */
 </style>
 </head>
 <body>
 
-<!-- SYSTEM MESSAGES -->
-<div id="systemMessage"></div>
-<div id="pauseOverlay"></div>
-<div id="tabWarning">
-  <span>🚨</span>
-  ⚠️ TAB SWITCH DETECTED!<br>
-  <span class="warning-sub">You left the quiz window. This has been recorded.</span>
-  <div class="warning-count" id="tabWarningCount">Warning 1 of 1</div>
-  <span class="warning-sub" style="font-size: 14px; color: #ff6b6b;">
-    🔄 Your answer will be auto-submitted on the next switch!
-  </span>
-</div>
+<!-- ... all existing HTML elements ... -->
 
-<!-- PROCTORING CONSENT OVERLAY -->
-<div id="consentOverlay">
-  <div>
-    <h2>📷 Proctoring Required</h2>
-    <p style="margin:10px 0;">This quiz uses your camera and microphone to maintain academic integrity.</p>
-    <p style="margin:10px 0;">Snapshots and short audio clips will be recorded for adjudicator review.</p>
-    <button id="consentAllowBtn" style="background:#4CAF50; color:white; padding:12px 24px; border:none; border-radius:8px; font-size:18px; margin:10px; cursor:pointer;">✅ I Agree – Start Monitoring</button>
-    <br>
-    <button id="consentDenyBtn" style="background:#f44336; color:white; padding:12px 24px; border:none; border-radius:8px; font-size:18px; cursor:pointer;">❌ Deny (Quiz will not start)</button>
-  </div>
-</div>
-
-<!-- CAMERA PREVIEW -->
+<!-- CAMERA PREVIEW (now draggable) -->
 <div id="camPreviewContainer">
   <video id="camPreview" autoplay muted playsinline></video>
   <button id="toggleCamPreview" onclick="toggleCamPreview()">🔄</button>
   <span id="recordingIndicator">● REC</span>
 </div>
 
-<!-- LANDING PAGE -->
-<div id="landingPage" class="colourful-welcome">
-  <h1>🏆 WELCOME TO CHIZ QUIZ SYSTEMS</h1>
-  <h2>ALL LEVELS QUIZ - 2026</h2>
-  <p style="font-size: 18px; margin-bottom: 10px;">Please select your role to continue:</p>
-  <select id="userRole" style="cursor: pointer; font-weight: bold; width: 60%; padding: 12px; border-radius: 8px; border: none; font-size: 16px; margin: 0 auto; display: block;">
-    <option value="none">-- Choose Here --</option>
-    <option value="participant">👨‍🔬 Login as Participant</option>
-    <option value="admin">🛠️ Login as Admin</option>
-  </select>
-  <br>
-  <button onclick="goToSelectedLogin()" style="background: white; color: #1976d2; font-weight: bold; font-size: 18px; padding: 14px 40px; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: all 0.3s ease; margin: 10px auto; display: block;">
-    Continue ➡
-  </button>
-</div>
-
-<!-- PARTICIPANT LOGIN -->
-<div id="login" class="login-box" style="display:none;">
-  <h2 style="color: #1976d2;">Participant Login</h2>
-  <input id="team" placeholder="Enter Team Name">
-  <div style="position:relative; display:inline-block; width: 80%; max-width: 300px; margin: 10px auto;">
-    <input id="password" type="password" placeholder="Enter Password" style="width: 100%;">
-    <span onclick="toggleParticipantPassword()" style="position:absolute; right:12px; top:14px; cursor:pointer; font-size:20px;">👁️</span>
-  </div>
-  <button id="startBtn" onclick="startQuiz()" style="background: #1976d2; color: white; padding: 14px 40px; font-size: 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: all 0.3s ease; margin: 10px auto; display: block;">
-  Continue ➡
-  </button>
-  <span class="register-link" onclick="showRegistrationForm()">📝 Register New Account</span>
-  <button onclick="goBackToHome()" style="background: #ccc; color: black; font-size: 14px; padding: 10px 30px; border-radius: 8px; border: none; cursor: pointer; margin: 5px auto; display: block;">
-    ⬅ Back to Home
-  </button>
-  <p id="loginMessage" style="font-size:18px; font-weight:bold; color:green; margin-top:15px;"></p>
-</div>
-
-<!-- REGISTRATION FORM -->
-<div id="registrationForm" class="login-box" style="display:none;">
-  <h2 style="color: #f57c00;">Register New Account</h2>
-  <input id="regTeam" placeholder="Choose Team Name">
-  <input id="regPass" type="password" placeholder="Create Password">
-  <select id="regLevel" style="width:80%; max-width:300px; margin:10px auto; padding:12px; border-radius:8px; border:1px solid #ccc;">
-    <option value="Primary">Primary</option>
-    <option value="Secondary">Secondary</option>
-  </select>
-  <select id="regCategory" style="width:80%; max-width:300px; margin:10px auto; padding:12px; border-radius:8px; border:1px solid #ccc;">
-    <option value="Quiz">Quiz</option>
-    <option value="Olympiad">Olympiad</option>
-  </select>
-  <button onclick="submitRegistration()" style="background: #f57c00; color: white; padding: 14px 40px; font-size: 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; margin: 10px auto; display: block;">Submit Registration</button>
-  <button onclick="showLogin()" style="background: #ccc; color: black; font-size: 14px; padding: 10px 30px; border-radius: 8px; border: none; cursor: pointer; margin: 5px auto; display: block;">⬅ Back to Login</button>
-  <p id="regMessage" style="font-size:18px; font-weight:bold; color:green; margin-top:15px;"></p>
-</div>
-
-<!-- ADMIN LOGIN -->
-<div id="adminLogin" class="login-box" style="display:none;">
-  <h2 style="color: #d32f2f;">Admin Login</h2>
-  <div style="position:relative; display:inline-block; width: 80%; max-width: 300px; margin: 10px auto;">
-    <input id="adminPassword" type="password" placeholder="Enter Admin Password" style="width: 100%;">
-    <span onclick="toggleAdminPassword()" style="position:absolute; right:12px; top:14px; cursor:pointer; font-size:20px;">👁️</span>
-  </div>
-  <button onclick="startAdmin()" style="background: #d32f2f; color: white; padding: 14px 40px; font-size: 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: all 0.3s ease; margin: 10px auto; display: block;">
-    Access Dashboard
-  </button>
-  <button onclick="goBackToHome()" style="background: #ccc; color: black; font-size: 14px; padding: 10px 30px; border-radius: 8px; border: none; cursor: pointer; margin: 5px auto; display: block;">
-    ⬅ Back to Home
-  </button>
-</div>
-
-<!-- CATEGORY SELECTION -->
-<div id="categorySelection" style="display:none; max-width: 800px; margin: 0 auto; padding: 20px; text-align: center;">
-  <h2 style="color: #1976d2;">Select Your Quiz/Olympiad</h2>
-  <p style="color: #666; margin-bottom: 20px;">Choose the category you want to participate in:</p>
-  <div id="categoryList" class="category-selector"></div>
-</div>
-
-<!-- QUESTION BOARD -->
-<div id="board" style="display:none;">
-  <h2 style="color: #1976d2;">CLICK ON THE QUESTION TO OPEN IT</h2>
-  <hr style="border: 1px solid #ccc; margin: 20px 0;">
-
-  <div class="board-toolbar">
-    <div class="toolbar-group">
-      <button id="refreshBtn" onclick="triggerRefresh()" style="background: #1976d2; color: white;">
-        🔄 Refresh Board
-      </button>
-      <button id="toggleAnsweredBtn" onclick="toggleHideAnswered()" style="background: #546e7a; color: white;">
-        👁 Hide Answered
-      </button>
-    </div>
-    <div class="toolbar-group">
-      <button onclick="backToCategorySelection()" style="background: #f57c00; color: white;">
-        ⬅ Change Category
-      </button>
-      <button onclick="logoutStudent()" style="background: #d32f2f; color: white;">
-        🚪 Log Out
-      </button>
-    </div>
-  </div>
-
-  <div id="grid" class="grid"></div>
-  <br>
-  <h3>🏆 Live Leaderboard</h3>
-  <div id="leaderboard"></div>
-</div>
-
-<!-- QUESTION BOX -->
-<div id="questionBox">
-  <div id="questionImage" style="display:none;"></div>
-  <div id="questionText"></div>
-  <div id="pointsDisplay"></div>
-  <div id="timerDisplay">⏱ --</div>
-  <div id="options"></div>
-  <div id="answerArea">
-    <div id="mathToolbar" class="math-toolbar" style="display:none;">
-      <button onclick="insertAtCursor('x²')">x²</button>
-      <button onclick="insertAtCursor('x³')">x³</button>
-      <button onclick="insertAtCursor('√(')">√(</button>
-      <button onclick="insertAtCursor('π')">π</button>
-      <button onclick="insertAtCursor('θ')">θ</button>
-      <button onclick="insertAtCursor('Δ')">Δ</button>
-      <button onclick="insertAtCursor('∑')">∑</button>
-      <button onclick="insertAtCursor('∫')">∫</button>
-      <button onclick="insertAtCursor('±')">±</button>
-      <button onclick="insertAtCursor('÷')">÷</button>
-      <button onclick="insertAtCursor('½')">½</button>
-      <button onclick="insertAtCursor('∞')">∞</button>
-      <button onclick="insertAtCursor('^')">^</button>
-      <button onclick="insertAtCursor('_')">_</button>
-      <button onclick="insertAtCursor('\\frac{}{}')">frac</button>
-      <button onclick="insertAtCursor('\\sqrt{}')">sqrt</button>
-    </div>
-    <div id="mathPreview" class="math-preview"></div>
-    <textarea id="textAnswer" rows="3" placeholder="Type your answer here... (Ctrl+Enter to submit)" style="display:none;"></textarea>
-    <button id="submitBtn" onclick="submitAnswerUI()">Submit Answer (Ctrl+Enter)</button>
-    <div id="result" style="display:none;"></div>
-  </div>
-  <button id="backBtn" class="btn-secondary" onclick="backToBoard()">⬅ Back to Board</button>
-</div>
+<!-- ... rest of HTML ... -->
 
 <script>
-// ═══════════════════════════════════════════
-// CONFIGURATION – Replace with your deployed Web App URL
-// ═══════════════════════════════════════════
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx96EfOEGIznqfoS12_eqTo747971g8Hj62AG786pyPdUIfh_sPiWMWbxozSvYniXYWVA/exec";
+// ============================================================
+// EXISTING SCRIPT CODE (callServer, etc.)
+// ============================================================
 
-// ═══════════════════════════════════════════
-// JSONP CALL SERVER – Bypasses CORS
-// ═══════════════════════════════════════════
-function callServer(functionName, ...args) {
-  return new Promise(function(resolve, reject) {
-    const callbackName = 'jsonp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    
-    window[callbackName] = function(data) {
-      delete window[callbackName];
-      document.body.removeChild(scriptTag);
-      if (data.error) {
-        reject(new Error(data.error));
-      } else {
-        resolve(data.result);
-      }
-    };
-    
-    const params = new URLSearchParams();
-    params.append('callback', callbackName);
-    params.append('function', functionName);
-    params.append('args', JSON.stringify(args));
-    
-    const scriptTag = document.createElement('script');
-    scriptTag.src = APPS_SCRIPT_URL + '?' + params.toString();
-    scriptTag.onerror = function() {
-      delete window[callbackName];
-      document.body.removeChild(scriptTag);
-      reject(new Error('Network error — check your Apps Script deployment'));
-    };
-    
-    document.body.appendChild(scriptTag);
+// Add this block to make the camera preview draggable
+(function() {
+  const container = document.getElementById('camPreviewContainer');
+  let isDragging = false;
+  let offsetX = 0, offsetY = 0;
+
+  container.addEventListener('mousedown', function(e) {
+    isDragging = true;
+    offsetX = e.clientX - container.getBoundingClientRect().left;
+    offsetY = e.clientY - container.getBoundingClientRect().top;
+    container.style.cursor = 'grabbing';
   });
-}
 
-// ═══════════════════════════════════════════
-// GLOBAL VARIABLES
-// ═══════════════════════════════════════════
-let proctoringActive = false;
-let mediaStream = null;
-let snapshotInterval = null;
-let audioRecorder = null;
-let audioChunks = [];
-let audioInterval = null;
-
-let team = "";
-let availableCategories = [];
-let currentCategory = "";
-let currentQuestion = "";
-let selectedAnswer = "";
-let submitted = false;
-let pollInterval = null;
-let hideAnswered = false;
-
-let questionEndTimes = {};
-let currentTimerId = null;
-let timerInterval = null;
-
-let tabSwitchEnabled = false;
-let tabSwitchCount = 0, tabWarningShown = false, autoSubmitted = false;
-let systemInterval = null;
-
-// ═══════════════════════════════════════════
-// KEYBOARD SHORTCUTS & PROTECTION
-// ═══════════════════════════════════════════
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || (e.ctrlKey && e.key === 'u')) {
-    e.preventDefault(); return false;
-  }
-  if (e.ctrlKey || e.metaKey) {
-    const key = e.key.toLowerCase();
-    if (key === 'c' || key === 'v' || key === 'x' || key === 'u') {
-      e.preventDefault(); return false;
-    }
-  }
-  const isEnter = (e.key === 'Enter' || e.code === 'Enter' || e.keyCode === 13);
-  if ((e.ctrlKey || e.shiftKey) && isEnter) {
-    const qbox = document.getElementById('questionBox');
-    const isVisible = qbox && window.getComputedStyle(qbox).display !== 'none';
-    if (isVisible && typeof submitted !== 'undefined' && !submitted) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (typeof submitAnswerUI === 'function') submitAnswerUI();
-    }
-  }
-});
-
-// ═══════════════════════════════════════════
-// MATH TOOLBAR FUNCTIONS
-// ═══════════════════════════════════════════
-function insertAtCursor(text) {
-  const ta = document.getElementById('textAnswer');
-  if (!ta) return;
-  const start = ta.selectionStart;
-  const end = ta.selectionEnd;
-  ta.value = ta.value.substring(0, start) + text + ta.value.substring(end);
-  ta.selectionStart = ta.selectionEnd = start + text.length;
-  ta.focus();
-  updateMathPreviewDebounced();
-}
-
-let previewTimeout;
-function updateMathPreviewDebounced() {
-  clearTimeout(previewTimeout);
-  previewTimeout = setTimeout(updateMathPreview, 150);
-}
-
-function updateMathPreview() {
-  const ta = document.getElementById('textAnswer');
-  const preview = document.getElementById('mathPreview');
-  if (!preview || !ta) return;
-  const text = ta.value.trim();
-  if (!text) {
-    preview.style.display = 'none';
-    preview.innerHTML = '';
-    return;
-  }
-  preview.style.display = 'block';
-  preview.innerHTML = '\\(' + text + '\\)';
-  if (window.MathJax) {
-    MathJax.typesetPromise([preview]).catch(err => console.log('MathJax error:', err));
-  } else {
-    preview.textContent = text;
-  }
-}
-
-function showMathToolbar() {
-  document.getElementById('mathToolbar').style.display = 'flex';
-  document.getElementById('mathPreview').style.display = 'none';
-  const ta = document.getElementById('textAnswer');
-  if (ta) ta.addEventListener('input', updateMathPreviewDebounced);
-}
-
-function hideMathToolbar() {
-  document.getElementById('mathToolbar').style.display = 'none';
-  document.getElementById('mathPreview').style.display = 'none';
-  const ta = document.getElementById('textAnswer');
-  if (ta) ta.removeEventListener('input', updateMathPreviewDebounced);
-}
-
-// ═══════════════════════════════════════════
-// PROCTORING FUNCTIONS
-// ═══════════════════════════════════════════
-function requestProctoringPermission() {
-  document.getElementById('consentOverlay').style.display = 'block';
-}
-
-document.getElementById('consentAllowBtn').addEventListener('click', async function() {
-  document.getElementById('consentOverlay').style.display = 'none';
-  try {
-    mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    proctoringActive = true;
-    
-    const video = document.getElementById('camPreview');
-    video.srcObject = mediaStream;
-    document.getElementById('camPreviewContainer').style.display = 'block';
-    
-    snapshotInterval = setInterval(captureAndUploadSnapshot, 10000);
-    startAudioRecording();
-    audioInterval = setInterval(() => {
-      stopAndUploadAudio();
-      startAudioRecording();
-    }, 30000);
-    
-    showCategoriesAfterLogin();
-  } catch (err) {
-    alert('Could not access camera/microphone: ' + err.message + '\n\nProctoring is required. Returning to home.');
-    denyProctoring();
-  }
-});
-
-document.getElementById('consentDenyBtn').addEventListener('click', function() {
-  alert('Proctoring is required for this quiz. Returning to home.');
-  denyProctoring();
-});
-
-function denyProctoring() {
-  document.getElementById('consentOverlay').style.display = 'none';
-  stopProctoring();
-  goBackToHome();
-}
-
-function showCategoriesAfterLogin() {
-  document.getElementById("categorySelection").style.display = "block";
-  showCategorySelection();
-  enableTabDetection();
-  startGlobalTimer();
-}
-
-function captureAndUploadSnapshot() {
-  if (!proctoringActive || !mediaStream) return;
-  const video = document.getElementById('camPreview');
-  if (!video.videoWidth) return;
-  const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth || 320;
-  canvas.height = video.videoHeight || 240;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  const imageData = canvas.toDataURL('image/jpeg', 0.5);
-  const base64 = imageData.split(',')[1];
-  callServer('saveProctoringSnapshot', team, base64).catch(e => console.error('Snapshot upload failed:', e));
-}
-
-function startAudioRecording() {
-  if (!proctoringActive || !mediaStream) return;
-  const audioTrack = mediaStream.getAudioTracks()[0];
-  if (!audioTrack) return;
-  const audioStream = new MediaStream([audioTrack]);
-  audioChunks = [];
-  try {
-    audioRecorder = new MediaRecorder(audioStream, { mimeType: 'audio/webm' });
-  } catch (e) {
-    audioRecorder = new MediaRecorder(audioStream);
-  }
-  audioRecorder.ondataavailable = e => {
-    if (e.data.size > 0) audioChunks.push(e.data);
-  };
-  audioRecorder.onstop = () => {
-    if (audioChunks.length > 0) {
-      const blob = new Blob(audioChunks, { type: 'audio/webm' });
-      const reader = new FileReader();
-      reader.onloadend = function() {
-        const base64 = reader.result.split(',')[1];
-        callServer('saveProctoringAudio', team, base64).catch(e => console.error('Audio upload failed:', e));
-      };
-      reader.readAsDataURL(blob);
-      audioChunks = [];
-    }
-  };
-  audioRecorder.start();
-}
-
-function stopAndUploadAudio() {
-  if (audioRecorder && audioRecorder.state === 'recording') {
-    audioRecorder.stop();
-  }
-}
-
-function toggleCamPreview() {
-  const preview = document.getElementById('camPreviewContainer');
-  preview.style.display = (preview.style.display === 'none') ? 'block' : 'none';
-}
-
-function stopProctoring() {
-  proctoringActive = false;
-  if (snapshotInterval) { clearInterval(snapshotInterval); snapshotInterval = null; }
-  if (audioInterval) { clearInterval(audioInterval); audioInterval = null; }
-  if (audioRecorder && audioRecorder.state === 'recording') {
-    audioRecorder.stop();
-  }
-  if (mediaStream) {
-    mediaStream.getTracks().forEach(track => track.stop());
-  }
-  document.getElementById('camPreviewContainer').style.display = 'none';
-  mediaStream = null;
-}
-
-// ═══════════════════════════════════════════
-// PERSISTENT TIMER LOGIC
-// ═══════════════════════════════════════════
-function startGlobalTimer() {
-  if (timerInterval) return;
-  timerInterval = setInterval(checkTimers, 1000);
-}
-
-function stopGlobalTimer() {
-  if (timerInterval) {
-    clearInterval(timerInterval);
-    timerInterval = null;
-  }
-}
-
-function checkTimers() {
-  const now = Date.now();
-  for (const [qid, endTime] of Object.entries(questionEndTimes)) {
-    if (now >= endTime) {
-      delete questionEndTimes[qid];
-      if (currentQuestion === qid && !submitted) {
-        document.getElementById("timerDisplay").innerHTML = "⏰ TIME UP";
-        const textBox = document.getElementById("textAnswer");
-        if (textBox.style.display !== "none") {
-          if (textBox.value.trim() === "") textBox.value = "NO ANSWER";
-        } else {
-          if (selectedAnswer === "") selectedAnswer = "NO ANSWER";
-        }
-        submitAnswerUI();
-      }
-      break;
-    }
-  }
-  if (currentTimerId && questionEndTimes[currentTimerId]) {
-    const remaining = Math.max(0, Math.ceil((questionEndTimes[currentTimerId] - now) / 1000));
-    document.getElementById("timerDisplay").innerHTML = "⏱ " + remaining + "s";
-  } else {
-    document.getElementById("timerDisplay").innerHTML = "⏱ --";
-  }
-}
-
-// ═══════════════════════════════════════════
-// EXTRACT GOOGLE DRIVE FILE ID
-// ═══════════════════════════════════════════
-function extractDriveFileId(input) {
-  if (!input || input.trim() === '') return null;
-  if (input.includes('drive.google.com')) {
-    const match = input.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    if (match && match[1]) return match[1];
-    const idMatch = input.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    if (idMatch && idMatch[1]) return idMatch[1];
-    const ucMatch = input.match(/uc\?id=([a-zA-Z0-9_-]+)/);
-    if (ucMatch && ucMatch[1]) return ucMatch[1];
-  }
-  const rawMatch = input.match(/^([a-zA-Z0-9_-]{25,})/);
-  if (rawMatch && rawMatch[1]) return rawMatch[1];
-  if (input.startsWith('http://') || input.startsWith('https://')) return input;
-  return null;
-}
-
-// ═══════════════════════════════════════════
-// TAB SWITCH DETECTION
-// ═══════════════════════════════════════════
-function enableTabDetection() {
-  if (tabSwitchEnabled) return;
-  tabSwitchEnabled = true;
-  document.addEventListener('visibilitychange', onVisibilityChange);
-}
-function disableTabDetection() {
-  tabSwitchEnabled = false;
-  document.removeEventListener('visibilitychange', onVisibilityChange);
-  document.getElementById('tabWarning').style.display = 'none';
-  tabWarningShown = false;
-}
-function onVisibilityChange() {
-  if (!tabSwitchEnabled) return;
-  if (document.hidden) {
-    tabSwitchCount++;
-    tabWarningShown = true;
-    const warningDiv = document.getElementById('tabWarning');
-    const countSpan = document.getElementById('tabWarningCount');
-    if (tabSwitchCount >= 2) {
-      countSpan.textContent = '⚠️ AUTO-SUBMITTING ON NEXT SWITCH!';
-      countSpan.style.color = '#ff4444';
-    } else {
-      countSpan.textContent = 'Warning ' + tabSwitchCount + ' of 1';
-    }
-    warningDiv.style.display = 'block';
-    if (tabSwitchCount >= 2) autoSubmitOnTabSwitch();
-  } else {
-    if (tabWarningShown) {
-      setTimeout(() => {
-        document.getElementById('tabWarning').style.display = 'none';
-        tabWarningShown = false;
-      }, 3000);
-    }
-  }
-}
-function autoSubmitOnTabSwitch() {
-  if (document.getElementById('questionBox').style.display === 'block' && !submitted && !autoSubmitted) {
-    autoSubmitted = true;
-    if (currentQuestion) delete questionEndTimes[currentQuestion];
-    const textBox = document.getElementById('textAnswer');
-    let answer = textBox.style.display !== 'none' ? (textBox.value || 'No answer (tab switched - auto-submitted)') : (selectedAnswer || 'No answer selected (tab switched - auto-submitted)');
-    document.getElementById('result').innerHTML = '⏳ <strong>AUTO-SUBMITTED</strong> - You switched tabs.';
-    document.getElementById('result').className = 'result-box result-pending';
-    document.getElementById('result').style.display = 'block';
-    callServer('submitAnswer', team, currentCategory, currentQuestion, answer)
-      .then(() => {
-        submitted = true;
-        document.getElementById('submitBtn').disabled = true;
-        document.getElementById('submitBtn').innerHTML = '📤 Auto-Submitted';
-        loadLeaderboard(currentCategory);
-        loadQuestionsForCategory(currentCategory);
-      })
-      .catch(err => console.error('Auto-submit failed:', err));
-  }
-}
-
-// ═══════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════
-function goToSelectedLogin() {
-  const role = document.getElementById("userRole").value;
-  if (role === "participant") {
-    document.getElementById("landingPage").style.display = "none";
-    document.getElementById("login").style.display = "block";
-  } else if (role === "admin") {
-    document.getElementById("landingPage").style.display = "none";
-    document.getElementById("adminLogin").style.display = "block";
-  } else {
-    alert("Please select a role from the drop-down menu first.");
-  }
-}
-function goBackToHome() {
-  stopGlobalTimer();
-  disableTabDetection();
-  hideMathToolbar();
-  stopProctoring();
-  document.getElementById("login").style.display = "none";
-  document.getElementById("adminLogin").style.display = "none";
-  document.getElementById("registrationForm").style.display = "none";
-  document.getElementById("board").style.display = "none";
-  document.getElementById("questionBox").style.display = "none";
-  document.getElementById("categorySelection").style.display = "none";
-  document.getElementById("landingPage").style.display = "block";
-  document.getElementById("userRole").value = "none";
-  document.getElementById("team").value = '';
-  document.getElementById("password").value = '';
-  team = '';
-}
-function backToCategorySelection() {
-  stopGlobalTimer();
-  clearInterval(systemInterval);
-  disableTabDetection();
-  hideMathToolbar();
-  document.getElementById("board").style.display = "none";
-  document.getElementById("questionBox").style.display = "none";
-  document.getElementById("categorySelection").style.display = "block";
-  showCategorySelection();
-}
-function showRegistrationForm() {
-  document.getElementById("login").style.display = "none";
-  document.getElementById("registrationForm").style.display = "block";
-}
-function showLogin() {
-  document.getElementById("registrationForm").style.display = "none";
-  document.getElementById("login").style.display = "block";
-}
-function logoutStudent() {
-  stopGlobalTimer();
-  clearInterval(systemInterval);
-  disableTabDetection();
-  hideMathToolbar();
-  stopProctoring();
-  document.getElementById("board").style.display = "none";
-  document.getElementById("questionBox").style.display = "none";
-  document.getElementById("categorySelection").style.display = "none";
-  team = "";
-  document.getElementById("team").value = "";
-  document.getElementById("password").value = "";
-  goBackToHome();
-}
-
-// ═══════════════════════════════════════════
-// ADMIN LOGIN
-// ═══════════════════════════════════════════
-function startAdmin() {
-  const pass = document.getElementById("adminPassword").value.trim();
-  const btn = document.querySelector("#adminLogin button");
-  btn.disabled = true;
-  btn.innerHTML = "⏳ Verifying...";
-  btn.style.background = "orange";
-  callServer("verifyAdminPassword", pass)
-    .then(ok => {
-      if (ok) {
-        localStorage.setItem('jetsAdminAccess', 'granted');
-        localStorage.setItem('jetsAdminTimestamp', String(Date.now()));
-        sessionStorage.setItem('jetsAdminAccess', 'granted');
-        return callServer("getWebAppUrl");
-      } else {
-        throw new Error("Wrong password");
-      }
-    })
-    .then(url => {
-      window.top.location.href = url + "?page=admin";
-    })
-    .catch(error => {
-      btn.disabled = false;
-      btn.innerHTML = "Access Dashboard";
-      btn.style.background = "#d32f2f";
-      alert("Error: " + error.message);
-    });
-}
-
-// ═══════════════════════════════════════════
-// PARTICIPANT LOGIN (with proctoring check)
-// ═══════════════════════════════════════════
-function startQuiz() {
-  team = document.getElementById("team").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const startBtn = document.getElementById("startBtn");
-  startBtn.disabled = true; startBtn.innerHTML = "⏳ Checking..."; startBtn.style.background = "orange";
-  if(!team || !password){
-    alert("Enter Team Name and Password");
-    startBtn.disabled = false; startBtn.innerHTML = "Continue"; startBtn.style.background = "#1976d2";
-    return;
-  }
-  callServer("verifyTeam", team, password)
-    .then(res => {
-      if(!res.success){
-        document.getElementById("loginMessage").innerHTML = "❌ " + res.message;
-        document.getElementById("loginMessage").style.color = "red";
-        startBtn.disabled = false; startBtn.innerHTML = "Continue"; startBtn.style.background = "#1976d2";
-        return;
-      }
-      document.getElementById("startBtn").innerHTML = "✔ Accepted";
-      document.getElementById("startBtn").style.background = "green";
-      document.getElementById("startBtn").disabled = true;
-      document.getElementById("loginMessage").innerHTML = "✔ ACCESS GRANTED";
-      document.getElementById("login").style.display = "none";
-      availableCategories = res.availableCategories || [];
-      
-      return callServer("getProctoringStatus").then(isProctoringOn => {
-        if (isProctoringOn) {
-          requestProctoringPermission();
-        } else {
-          showCategoriesAfterLogin();
-        }
-      });
-    })
-    .catch(error => {
-      startBtn.disabled = false; startBtn.innerHTML = "Continue"; startBtn.style.background = "#1976d2";
-      document.getElementById("loginMessage").innerHTML = "❌ Network error. Try again.";
-      document.getElementById("loginMessage").style.color = "red";
-    });
-}
-
-// ═══════════════════════════════════════════
-// REGISTRATION
-// ═══════════════════════════════════════════
-function submitRegistration() {
-  const t = document.getElementById("regTeam").value.trim();
-  const p = document.getElementById("regPass").value.trim();
-  const l = document.getElementById("regLevel").value;
-  const c = document.getElementById("regCategory").value;
-  if (!t || !p) { document.getElementById("regMessage").innerHTML = "❌ Please fill all fields."; return; }
-  callServer("submitRegistration", t, p, l, c)
-    .then(msg => document.getElementById("regMessage").innerHTML = msg)
-    .catch(err => document.getElementById("regMessage").innerHTML = "❌ Error: " + err.message);
-}
-
-// ═══════════════════════════════════════════
-// CATEGORY SELECTION
-// ═══════════════════════════════════════════
-function showCategorySelection() {
-  const container = document.getElementById("categoryList");
-  container.innerHTML = "";
-  if (!availableCategories || availableCategories.length === 0) {
-    container.innerHTML = "<p style='color: #999;'>No categories available.</p>";
-    return;
-  }
-  availableCategories.forEach(function(cat) {
-    const btn = document.createElement("button");
-    btn.className = "category-btn";
-    const icon = cat.type === 'Quiz' ? '📝' : '🏅';
-    btn.innerHTML = `${icon} ${cat.name}<span class="badge">${cat.level} • ${cat.type}</span>`;
-    btn.onclick = function() { selectCategory(cat.id); };
-    container.appendChild(btn);
+  document.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    container.style.left = (e.clientX - offsetX) + 'px';
+    container.style.top = (e.clientY - offsetY) + 'px';
+    container.style.right = 'auto'; // disable right positioning when left is set
   });
-}
-function selectCategory(categoryId) {
-  currentCategory = categoryId;
-  document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById("categorySelection").style.display = "none";
-  document.getElementById("board").style.display = "block";
-  loadQuestionsForCategory(categoryId);
-  startSystemListener();
-  checkSystemState();
-  systemInterval = setInterval(checkSystemState, 3000);
-}
 
-// ═══════════════════════════════════════════
-// HIDE / SHOW ANSWERED QUESTIONS
-// ═══════════════════════════════════════════
-function toggleHideAnswered() {
-  hideAnswered = !hideAnswered;
-  document.getElementById('toggleAnsweredBtn').textContent = hideAnswered ? '👁 Show Answered' : '👁 Hide Answered';
-  loadQuestionsForCategory(currentCategory);
-}
+  document.addEventListener('mouseup', function() {
+    isDragging = false;
+    container.style.cursor = 'move';
+  });
 
-// ═══════════════════════════════════════════
-// LOAD QUESTIONS FOR CATEGORY
-// ═══════════════════════════════════════════
+  // Touch support
+  container.addEventListener('touchstart', function(e) {
+    const touch = e.touches[0];
+    isDragging = true;
+    offsetX = touch.clientX - container.getBoundingClientRect().left;
+    offsetY = touch.clientY - container.getBoundingClientRect().top;
+  });
+
+  document.addEventListener('touchmove', function(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    container.style.left = (touch.clientX - offsetX) + 'px';
+    container.style.top = (touch.clientY - offsetY) + 'px';
+    container.style.right = 'auto';
+  });
+
+  document.addEventListener('touchend', function() {
+    isDragging = false;
+  });
+})();
+
+// Modify loadQuestionsForCategory to add 'answered' class to locked buttons
 function loadQuestionsForCategory(categoryId) {
   callServer("getQuestionsForCategory", team, categoryId)
     .then(data => {
@@ -1072,6 +204,9 @@ function loadQuestionsForCategory(categoryId) {
         if (hideAnswered && q.locked) return;
         let btn = document.createElement("button");
         btn.className = "question-btn";
+        if (q.locked) {
+          btn.classList.add('answered');   // add class for answered questions
+        }
         btn.dataset.id = q.id;
         btn.innerHTML = q.locked ? "✓ " + q.id : q.id;
         btn.disabled = q.locked;
@@ -1097,398 +232,9 @@ function loadQuestionsForCategory(categoryId) {
     });
 }
 
-// ═══════════════════════════════════════════
-// SYSTEM STATE
-// ═══════════════════════════════════════════
-function startSystemListener() {
-  function fetchState() {
-    callServer("getSystemState").then(state => {
-      if (state.ActiveQuestion) {
-        let rawTarget = String(state.ActiveQuestion).trim().toUpperCase();
-        let targetList = rawTarget.split(",").map(item => item.trim());
-        document.querySelectorAll(".question-btn").forEach(btn => {
-          let btnId = String(btn.dataset.id).trim().toUpperCase();
-          let isMatched = targetList.some(target => btnId === target || btnId.replace("Q","") === target.replace("Q",""));
-          btn.style.display = (rawTarget === "ALL" || isMatched) ? "inline-block" : "none";
-        });
-      }
-      document.getElementById("leaderboard").style.display = (state.ShowLeaderboard === "false") ? "none" : "block";
-    }).catch(e => console.error(e));
-  }
-  fetchState();
-  setInterval(fetchState, 5000);
-}
-function checkSystemState(){
-  callServer("getSystemState")
-    .then(state => {
-      const msg = document.getElementById("systemMessage");
-      const overlay = document.getElementById("pauseOverlay");
-      if (state.Status === "Emergency") {
-        stopGlobalTimer();
-        overlay.style.display = "block";
-        overlay.innerHTML = "🚨 EMERGENCY STOP – Quiz halted";
-        document.querySelectorAll("button").forEach(btn => btn.disabled = true);
-        document.getElementById("questionBox").style.display = "none";
-        document.getElementById("board").style.display = "none";
-        document.body.classList.add("banner-visible");
-        return;
-      }
-      if (state.QuizActive === "false") {
-        stopGlobalTimer();
-        overlay.style.display = "block";
-        overlay.innerHTML = "⏸ The quiz round has not started yet.";
-        document.querySelectorAll("button").forEach(btn => btn.disabled = true);
-        document.getElementById("questionBox").style.display = "none";
-        document.getElementById("board").style.display = "none";
-        document.body.classList.add("banner-visible");
-        return;
-      }
-      if (state.Status === "Paused") {
-        stopGlobalTimer();
-        overlay.style.display = "none";
-        msg.style.display = "block";
-        msg.style.background = "#d32f2f";
-        msg.style.color = "white";
-        msg.innerHTML = "⛔ <b>QUIZ PAUSED</b> | 📢 " + (state.Broadcast || "Waiting...");
-        document.querySelectorAll("button").forEach(btn => btn.disabled = true);
-        document.body.classList.add("banner-visible");
-        return;
-      }
-      overlay.style.display = "none";
-      document.querySelectorAll("button").forEach(btn => btn.disabled = false);
-      startGlobalTimer();
-      if (state.Broadcast && String(state.Broadcast).trim() !== "") {
-        msg.style.display = "block";
-        msg.style.background = "#ffeb3b";
-        msg.style.color = "black";
-        msg.innerHTML = "📢 " + state.Broadcast;
-        document.body.classList.add("banner-visible");
-      } else {
-        msg.style.display = "none";
-        document.body.classList.remove("banner-visible");
-      }
-    })
-    .catch(e => console.error(e));
-}
-
-// ═══════════════════════════════════════════
-// LEADERBOARD
-// ═══════════════════════════════════════════
-function loadLeaderboard(categoryId) {
-  callServer("getLeaderboard", categoryId)
-    .then(data => {
-      let html = "<table><tr><th>Rank</th><th>Team</th><th>Score</th></tr>";
-      for(let i=0; i<data.length; i++){
-        const medal = i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : '';
-        html += `<tr><td style='padding:10px; font-weight: bold;'>${medal}${i+1}</td><td style='padding:10px; font-weight: bold;'>${data[i][0]}</td><td style='padding:10px; color: #388e3c; font-weight: bold;'>${data[i][1]}</td></tr>`;
-      }
-      html += "</table>";
-      document.getElementById("leaderboard").innerHTML = html;
-    })
-    .catch(e => console.error(e));
-}
-
-// ═══════════════════════════════════════════
-// OPEN QUESTION
-// ═══════════════════════════════════════════
-function openQuestion(id, categoryId) {
-  currentQuestion = id;
-  currentCategory = categoryId;
-  submitted = false;
-  autoSubmitted = false;
-  hideMathToolbar();
-
-  if (questionEndTimes[id] && Date.now() < questionEndTimes[id]) {
-    currentTimerId = id;
-    document.getElementById("questionBox").style.display = "block";
-    document.getElementById("board").style.display = "none";
-    return;
-  }
-
-  document.getElementById("questionImage").style.display = "none";
-  document.getElementById("questionImage").innerHTML = "";
-  document.getElementById("questionText").innerText = "";
-  document.getElementById("pointsDisplay").innerHTML = "";
-  document.getElementById("timerDisplay").innerHTML = "⏱ ...";
-  document.getElementById("options").innerHTML = "";
-  document.getElementById("textAnswer").style.display = "none";
-  document.getElementById("textAnswer").value = "";
-  document.getElementById("result").style.display = "none";
-  document.getElementById("result").innerHTML = "";
-  document.getElementById("submitBtn").disabled = false;
-  document.getElementById("submitBtn").innerHTML = "Submit Answer (Ctrl+Enter)";
-  document.getElementById("submitBtn").style.background = "#1976d2";
-  selectedAnswer = "";
-
-  document.getElementById("questionBox").style.display = "block";
-  document.getElementById("board").style.display = "none";
-
-  callServer("getQuestionForCategory", id, categoryId)
-    .then(q => {
-      const imageDiv = document.getElementById("questionImage");
-      if (q.image && q.image.trim() !== "") {
-        const extracted = extractDriveFileId(q.image.trim());
-        if (extracted && extracted.startsWith('http')) {
-          imageDiv.style.display = "block";
-          imageDiv.innerHTML = `<img src="${extracted}" alt="Question Image" style="max-width: 100%; max-height: 300px;">`;
-        } else if (extracted) {
-          imageDiv.style.display = "block";
-          imageDiv.innerHTML = `<div style="text-align:center; padding:20px;">⏳ Loading image...</div>`;
-          callServer("getImageData", extracted)
-            .then(result => {
-              if (result.success) imageDiv.innerHTML = `<img src="${result.dataUrl}" alt="Question Image" style="max-width: 100%; max-height: 300px;">`;
-              else imageDiv.innerHTML = `<div style="color:#d32f2f;">❌ Image not available</div>`;
-            })
-            .catch(e => imageDiv.innerHTML = `<div style="color:#d32f2f;">❌ Image loading error</div>`);
-        } else {
-          imageDiv.style.display = "none";
-        }
-      } else imageDiv.style.display = "none";
-
-      document.getElementById("questionText").innerText = q.question;
-      document.getElementById("pointsDisplay").innerHTML = "🏆 Points: " + q.maxScore;
-
-      const seconds = Number(q.time) || 30;
-      questionEndTimes[id] = Date.now() + (seconds * 1000);
-      currentTimerId = id;
-
-      const optionsDiv = document.getElementById("options");
-      optionsDiv.innerHTML = "";
-      selectedAnswer = "";
-      const questionType = String(q.type || "").trim().toUpperCase();
-
-      if (questionType === "MCQ"){
-        document.getElementById("textAnswer").style.display = "none";
-        document.getElementById("submitBtn").style.display = "block";
-        hideMathToolbar();
-        ["optionA", "optionB", "optionC", "optionD"].forEach(function(key){
-          if(q[key]){
-            let optBtn = document.createElement("button");
-            optBtn.innerHTML = q[key];
-            optBtn.onclick = function(){
-              document.querySelectorAll("#options button").forEach(b => b.classList.remove("selected"));
-              optBtn.classList.add("selected");
-              selectedAnswer = key.slice(-1).toUpperCase();
-            };
-            optionsDiv.appendChild(optBtn);
-          }
-        });
-      } else {
-        document.getElementById("textAnswer").style.display = "block";
-        document.getElementById("submitBtn").style.display = "block";
-        document.getElementById("textAnswer").value = "";
-        showMathToolbar();
-        document.getElementById("textAnswer").focus();
-        const ta = document.getElementById("textAnswer");
-        ta.style.height = "auto";
-        ta.style.height = (ta.scrollHeight) + "px";
-        ta.addEventListener("input", function() {
-          this.style.height = "auto";
-          this.style.height = (this.scrollHeight) + "px";
-        });
-      }
-    })
-    .catch(error => {
-      alert("❌ Network error. Returning to board.");
-      backToBoard();
-    });
-}
-
-// ═══════════════════════════════════════════
-// SUBMIT ANSWER HELPERS
-// ═══════════════════════════════════════════
-function submitAnswerForTimer(answer) {
-  callServer("submitAnswer", team, currentCategory, currentQuestion, answer)
-    .then(() => { 
-      loadQuestionsForCategory(currentCategory); 
-      loadLeaderboard(currentCategory); 
-    })
-    .catch(e => console.error(e));
-}
-
-function submitAnswerUI() {
-  if(submitted) return;
-  submitted = true;
-  const btn = document.getElementById("submitBtn");
-  btn.disabled = true;
-  btn.innerHTML = "⏳ Submitting...";
-  btn.style.background = "orange";
-  
-  if (currentQuestion) delete questionEndTimes[currentQuestion];
-  currentTimerId = null;
-  hideMathToolbar();
-
-  let answer = "";
-  const textBox = document.getElementById("textAnswer");
-  if(textBox.style.display !== "none") answer = textBox.value;
-  else answer = selectedAnswer;
-
-  if (!answer || answer.trim() === "" || answer.trim() === "NO ANSWER") {
-    if (answer.trim() !== "NO ANSWER") {
-      document.getElementById("result").innerHTML = "⚠️ Please provide an answer before submitting.";
-      document.getElementById("result").className = "result-box result-pending";
-      document.getElementById("result").style.display = "block";
-      btn.disabled = false;
-      btn.innerHTML = "Submit Answer (Ctrl+Enter)";
-      btn.style.background = "#1976d2";
-      submitted = false;
-      return;
-    }
-  }
-
-  callServer("submitAnswer", team, currentCategory, currentQuestion, answer)
-    .then(res => {
-      let resultHTML = "";
-      if (res.duplicate) {
-        resultHTML = "⚠️ Question already answered.<br>";
-        resultHTML += "📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided");
-        btn.innerHTML = "Rejected"; btn.style.background = "#d32f2f";
-        document.getElementById("result").className = "result-box result-wrong";
-      } else if (res.pending && res.aiGrading) {
-        resultHTML = "⏳ <strong>AI Grading in Progress...</strong><br>";
-        resultHTML += "📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>";
-        resultHTML += "✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
-        btn.innerHTML = "⏳ Grading..."; btn.style.background = "#f57c00";
-        document.getElementById("result").className = "result-box result-pending";
-        startPollingForResult(team, currentCategory, currentQuestion);
-      } else if (res.correct) {
-        resultHTML = "✅ <strong>CORRECT!</strong> +" + res.score + " Points<br>";
-        resultHTML += "📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>";
-        resultHTML += "✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
-        btn.innerHTML = "✅ Correct!"; btn.style.background = "#388e3c";
-        document.getElementById("result").className = "result-box result-correct";
-      } else {
-        resultHTML = "❌ <strong>WRONG</strong><br>";
-        resultHTML += "📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>";
-        resultHTML += "✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
-        btn.innerHTML = "❌ Wrong"; btn.style.background = "#d32f2f";
-        document.getElementById("result").className = "result-box result-wrong";
-      }
-      document.getElementById("result").innerHTML = resultHTML;
-      document.getElementById("result").style.display = "block";
-      loadLeaderboard(currentCategory);
-      loadQuestionsForCategory(currentCategory);
-    })
-    .catch(error => {
-      submitted = false;
-      btn.disabled = false;
-      btn.innerHTML = "Submit Answer (Ctrl+Enter)";
-      btn.style.background = "#1976d2";
-      document.getElementById("result").innerHTML = "❌ Network error. Submission failed.";
-      document.getElementById("result").className = "result-box result-wrong";
-      document.getElementById("result").style.display = "block";
-      alert("Submission failed. Try again.");
-      loadQuestionsForCategory(currentCategory);
-    });
-}
-
-// ═══════════════════════════════════════════
-// AI POLLING
-// ═══════════════════════════════════════════
-function startPollingForResult(team, categoryId, qid) {
-  let attempts = 0;
-  const maxAttempts = 20;
-  if (pollInterval) clearInterval(pollInterval);
-  pollInterval = setInterval(function() {
-    attempts++;
-    callServer("getAIResult", team, categoryId, qid)
-      .then(result => {
-        if (result.completed) {
-          clearInterval(pollInterval);
-          let resultHTML = "";
-          if (result.correct) {
-            resultHTML = "✅ <strong>AI GRADING COMPLETE!</strong> +" + result.score + " Points<br>";
-            document.getElementById("result").className = "result-box result-correct";
-          } else {
-            resultHTML = "❌ <strong>AI GRADING COMPLETE!</strong><br>";
-            document.getElementById("result").className = "result-box result-wrong";
-          }
-          resultHTML += "📖 <strong>Correct Answer:</strong> " + (result.correctAnswer || "") + "<br>";
-          resultHTML += "✏️ <strong>Your Answer:</strong> " + (result.yourAnswer || "");
-          document.getElementById("result").innerHTML = resultHTML;
-          document.getElementById("result").style.display = "block";
-          const btn = document.getElementById("submitBtn");
-          btn.innerHTML = result.correct ? "✅ Correct!" : "❌ Wrong";
-          btn.style.background = result.correct ? "#388e3c" : "#d32f2f";
-          loadLeaderboard(categoryId);
-        }
-      })
-      .catch(e => console.error(e));
-    if (attempts >= maxAttempts) {
-      clearInterval(pollInterval);
-      document.getElementById("result").innerHTML += "<br><em style='color:#f57c00;'>⏳ AI grading taking longer than expected.</em>";
-      document.getElementById("result").style.display = "block";
-    }
-  }, 3000);
-}
-
-// ═══════════════════════════════════════════
-// BACK TO BOARD
-// ═══════════════════════════════════════════
-function backToBoard() {
-  document.getElementById("questionBox").style.display = "none";
-  document.getElementById("board").style.display = "block";
-  loadQuestionsForCategory(currentCategory);
-  loadLeaderboard(currentCategory);
-}
-
-// ═══════════════════════════════════════════
-// PASSWORD TOGGLE & REFRESH
-// ═══════════════════════════════════════════
-function toggleParticipantPassword() {
-  document.getElementById("password").type = document.getElementById("password").type === "password" ? "text" : "password";
-}
-function toggleAdminPassword() {
-  document.getElementById("adminPassword").type = document.getElementById("adminPassword").type === "password" ? "text" : "password";
-}
-function triggerRefresh() {
-  const btn = document.getElementById("refreshBtn");
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = "⏳ Updating...";
-    btn.style.background = "orange";
-  }
-  loadQuestionsForCategory(currentCategory);
-}
+// ... rest of the existing script (submitAnswerUI, openQuestion, etc.) ...
 </script>
 
-<!-- Auto-close warning banner (Apps Script iframe) -->
-<script>
-(function() {
-  var style = document.createElement('style');
-  style.textContent = `#warning-bar, #docs-banner, .docs-banner, .gux-message-bar, iframe[src*="warning"] { display: none !important; }`;
-  document.head.appendChild(style);
-  function clickClose() {
-    var selectors = [
-      '#warning-bar [role="button"]', '#docs-banner [role="button"]',
-      '.docs-banner [role="button"]', '.gux-message-bar [role="button"]',
-      'div[aria-label*="close" i]', 'div[aria-label*="dismiss" i]',
-      'button[aria-label*="close" i]', 'button[aria-label*="dismiss" i]',
-      '.dismiss-button', '.close-button', '[data-tooltip="Close"]', '[title="Close"]',
-      '.goog-flat-menu-button'
-    ];
-    for (var i = 0; i < selectors.length; i++) {
-      var el = document.querySelector(selectors[i]);
-      if (el) { el.click(); return true; }
-    }
-    var all = document.querySelectorAll('*');
-    for (var j = 0; j < all.length; j++) {
-      if (all[j].children.length === 0 && (all[j].textContent.trim() === '×' || all[j].textContent.trim() === '✕')) {
-        all[j].click();
-        return true;
-      }
-    }
-    return false;
-  }
-  var attempts = 0, maxAttempts = 10;
-  var interval = setInterval(function() {
-    if (clickClose() || ++attempts >= maxAttempts) clearInterval(interval);
-  }, 200);
-  var observer = new MutationObserver(function() {
-    if (clickClose()) { observer.disconnect(); clearInterval(interval); }
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-})();
-</script>
+<!-- Auto-close warning banner script remains unchanged -->
 </body>
 </html>
