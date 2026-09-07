@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
+<base target="_top">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CHEESE Quiz System</title>
 <script>
-  MathJax = { loader: {load: ["[tex]/mhchem"]}, tex: {packages: {"[+]": ["mhchem"]}} };
+  MathJax = {
+    loader: {load: ['[tex]/mhchem']},
+    tex: {packages: {'[+]': ['mhchem']}}
+  };
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
 <style>
@@ -307,56 +309,9 @@ body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85
   .grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
   .question-btn { height: 44px; font-size: 13px; }
 }
-
-/* ===== MODULE A/B ADDITIONS ===== */
-#offlineBanner {
-  display: none; position: fixed; top: 0; left: 0; width: 100%; z-index: 9998;
-  background: #37474f; color: #fff; text-align: center; padding: 10px; font-weight: 600; font-size: 14px;
-}
-#offlineBanner.grace { background: #e65100; }
-#syncPill {
-  position: fixed; bottom: 10px; left: 10px; z-index: 9997; background: rgba(0,0,0,0.7); color: #fff;
-  padding: 6px 12px; border-radius: 20px; font-size: 12px; display: none;
-}
-#cameraGate {
-  display: none; position: fixed; inset: 0; background: #0d1117; color: #fff; z-index: 999999;
-  text-align: center; padding-top: 18vh;
-}
-#cameraGate h2 { font-size: 26px; margin-bottom: 14px; }
-#cameraGate p { font-size: 15px; color: #ccc; max-width: 480px; margin: 8px auto; line-height: 1.5; }
-#cameraGate button {
-  margin-top: 18px; background: #1976d2; color: #fff; border: none; padding: 12px 30px;
-  border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600;
-}
-#integrityLock {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.96); color: #ff6b6b; z-index: 9999999;
-  text-align: center; padding-top: 22vh;
-}
-#integrityLock h2 { font-size: 30px; }
-#integrityLock p { color: #ffaa00; font-size: 16px; margin-top: 12px; }
-.warn-badge {
-  display: inline-block; background: #e65100; color: #fff; padding: 4px 10px; border-radius: 12px;
-  font-size: 12px; font-weight: 600; margin-left: 8px;
-}
 </style>
 </head>
 <body>
-<!-- OFFLINE / SYNC INDICATORS -->
-<div id="offlineBanner"></div>
-<div id="syncPill"></div>
-
-<!-- CAMERA GATE (Module A1) -->
-<div id="cameraGate">
-  <h2>📷 Camera Access Required</h2>
-  <p id="cameraGateMsg">This quiz requires camera access for integrity monitoring. Please allow camera access and try again.</p>
-  <button onclick="retryCameraCheck()">🔄 Retry Camera Check</button>
-</div>
-
-<!-- INTEGRITY LOCK (Module A4) -->
-<div id="integrityLock">
-  <h2 id="integrityLockTitle">🚫 Quiz Submitted</h2>
-  <p id="integrityLockMsg">Your quiz was submitted automatically due to an integrity violation.</p>
-</div>
 
 <!-- SYSTEM MESSAGES -->
 <div id="systemMessage"></div>
@@ -366,70 +321,128 @@ body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85
   ⚠️ TAB SWITCH DETECTED!<br>
   <span class="warning-sub">You left the quiz window. This has been recorded.</span>
   <div class="warning-count" id="tabWarningCount">Warning 1 of 1</div>
+  <span class="warning-sub" style="font-size: 14px; color: #ff6b6b;">
+    🔄 Your answer will be auto-submitted on the next switch!
+  </span>
 </div>
 
+<!-- PROCTORING CONSENT OVERLAY -->
 <div id="consentOverlay">
   <div>
     <h2>📷 Proctoring Required</h2>
     <p style="margin:10px 0;">This quiz uses your camera and microphone to maintain academic integrity.</p>
-    <p style="margin:10px 0;">Snapshots and short audio clips will be recorded for adjudicator review. The quiz cannot start without camera access.</p>
+    <p style="margin:10px 0;">Snapshots and short audio clips will be recorded for adjudicator review.</p>
     <button id="consentAllowBtn" style="background:#4CAF50; color:white; padding:12px 24px; border:none; border-radius:8px; font-size:18px; margin:10px; cursor:pointer;">✅ I Agree – Start Monitoring</button>
     <br>
     <button id="consentDenyBtn" style="background:#f44336; color:white; padding:12px 24px; border:none; border-radius:8px; font-size:18px; cursor:pointer;">❌ Deny (Quiz will not start)</button>
   </div>
 </div>
 
+<!-- CAMERA PREVIEW -->
 <div id="camPreviewContainer">
   <video id="camPreview" autoplay muted playsinline></video>
+  <button id="toggleCamPreview" onclick="toggleCamPreview()">🔄</button>
   <span id="recordingIndicator">● REC</span>
 </div>
 
-<!-- LANDING / LOGIN -->
+<!-- LANDING PAGE -->
 <div id="landingPage" class="colourful-welcome">
-  <h1>🏆 CHEESE QUIZ SYSTEM</h1>
-  <h2>National Round 2026</h2>
-  <p style="font-size: 16px;">Enter your team credentials to begin.</p>
+  <h1>🏆 WELCOME TO CHIZ QUIZ SYSTEMS</h1>
+  <h2>ALL LEVELS QUIZ - 2026</h2>
+  <p style="font-size: 18px; margin-bottom: 10px;">Please select your role to continue:</p>
+  <select id="userRole" style="cursor: pointer; font-weight: bold; width: 60%; padding: 12px; border-radius: 8px; border: none; font-size: 16px; margin: 0 auto; display: block;">
+    <option value="none">-- Choose Here --</option>
+    <option value="participant">👨‍🔬 Login as Participant</option>
+    <option value="admin">🛠️ Login as Admin</option>
+  </select>
+  <br>
+  <button onclick="goToSelectedLogin()" style="background: white; color: #1976d2; font-weight: bold; font-size: 18px; padding: 14px 40px; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: all 0.3s ease; margin: 10px auto; display: block;">
+    Continue ➡
+  </button>
 </div>
 
-<div id="login" class="login-box">
-  <h2 style="color:#1976d2;">Participant Login</h2>
+<!-- PARTICIPANT LOGIN -->
+<div id="login" class="login-box" style="display:none;">
+  <h2 style="color: #1976d2;">Participant Login</h2>
   <input id="team" placeholder="Enter Team Name">
-  <div style="position:relative; display:inline-block; width:80%; max-width:300px; margin:10px auto;">
-    <input id="password" type="password" placeholder="Enter Password" style="width:100%;">
+  <div style="position:relative; display:inline-block; width: 80%; max-width: 300px; margin: 10px auto;">
+    <input id="password" type="password" placeholder="Enter Password" style="width: 100%;">
+    <span onclick="toggleParticipantPassword()" style="position:absolute; right:12px; top:14px; cursor:pointer; font-size:20px;">👁️</span>
   </div>
-  <button id="startBtn" onclick="startQuiz()" style="background:#1976d2; color:white; padding:14px 40px; font-size:18px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; margin:10px auto; display:block;">Continue ➡</button>
+  <button id="startBtn" onclick="startQuiz()" style="background: #1976d2; color: white; padding: 14px 40px; font-size: 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: all 0.3s ease; margin: 10px auto; display: block;">
+  Continue ➡
+  </button>
   <span class="register-link" onclick="showRegistrationForm()">📝 Register New Account</span>
-  <p id="loginMessage" style="font-size:16px; font-weight:bold; margin-top:12px;"></p>
+  <button onclick="goBackToHome()" style="background: #ccc; color: black; font-size: 14px; padding: 10px 30px; border-radius: 8px; border: none; cursor: pointer; margin: 5px auto; display: block;">
+    ⬅ Back to Home
+  </button>
+  <p id="loginMessage" style="font-size:18px; font-weight:bold; color:green; margin-top:15px;"></p>
 </div>
 
+<!-- REGISTRATION FORM -->
 <div id="registrationForm" class="login-box" style="display:none;">
-  <h2 style="color:#f57c00;">Register New Account</h2>
+  <h2 style="color: #f57c00;">Register New Account</h2>
   <input id="regTeam" placeholder="Choose Team Name">
   <input id="regPass" type="password" placeholder="Create Password">
-  <select id="regLevel"><option value="Primary">Primary</option><option value="Secondary">Secondary</option></select>
-  <select id="regCategory"><option value="Quiz">Quiz</option><option value="Olympiad">Olympiad</option></select>
-  <button onclick="submitRegistration()" style="background:#f57c00; color:white; padding:14px 40px; font-size:18px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; margin:10px auto; display:block;">Submit Registration</button>
-  <button onclick="showLogin()" style="background:#ccc; color:black; font-size:14px; padding:10px 30px; border-radius:8px; border:none; cursor:pointer; margin:5px auto; display:block;">⬅ Back to Login</button>
-  <p id="regMessage" style="font-size:16px; font-weight:bold; color:green; margin-top:12px;"></p>
+  <select id="regLevel" style="width:80%; max-width:300px; margin:10px auto; padding:12px; border-radius:8px; border:1px solid #ccc;">
+    <option value="Primary">Primary</option>
+    <option value="Secondary">Secondary</option>
+  </select>
+  <select id="regCategory" style="width:80%; max-width:300px; margin:10px auto; padding:12px; border-radius:8px; border:1px solid #ccc;">
+    <option value="Quiz">Quiz</option>
+    <option value="Olympiad">Olympiad</option>
+  </select>
+  <button onclick="submitRegistration()" style="background: #f57c00; color: white; padding: 14px 40px; font-size: 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; margin: 10px auto; display: block;">Submit Registration</button>
+  <button onclick="showLogin()" style="background: #ccc; color: black; font-size: 14px; padding: 10px 30px; border-radius: 8px; border: none; cursor: pointer; margin: 5px auto; display: block;">⬅ Back to Login</button>
+  <p id="regMessage" style="font-size:18px; font-weight:bold; color:green; margin-top:15px;"></p>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="adminLogin" class="login-box" style="display:none;">
+  <h2 style="color: #d32f2f;">Admin Login</h2>
+  <div style="position:relative; display:inline-block; width: 80%; max-width: 300px; margin: 10px auto;">
+    <input id="adminPassword" type="password" placeholder="Enter Admin Password" style="width: 100%;">
+    <span onclick="toggleAdminPassword()" style="position:absolute; right:12px; top:14px; cursor:pointer; font-size:20px;">👁️</span>
+  </div>
+  <button onclick="startAdmin()" style="background: #d32f2f; color: white; padding: 14px 40px; font-size: 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: all 0.3s ease; margin: 10px auto; display: block;">
+    Access Dashboard
+  </button>
+  <button onclick="goBackToHome()" style="background: #ccc; color: black; font-size: 14px; padding: 10px 30px; border-radius: 8px; border: none; cursor: pointer; margin: 5px auto; display: block;">
+    ⬅ Back to Home
+  </button>
 </div>
 
 <!-- CATEGORY SELECTION -->
-<div id="categorySelection" style="display:none; max-width:800px; margin:0 auto; padding:20px; text-align:center;">
-  <h2 style="color:#1976d2;">Select Your Quiz/Olympiad</h2>
+<div id="categorySelection" style="display:none; max-width: 800px; margin: 0 auto; padding: 20px; text-align: center;">
+  <h2 style="color: #1976d2;">Select Your Quiz/Olympiad</h2>
+  <p style="color: #666; margin-bottom: 20px;">Choose the category you want to participate in:</p>
   <div id="categoryList" class="category-selector"></div>
 </div>
 
-<!-- BOARD -->
+<!-- QUESTION BOARD -->
 <div id="board" style="display:none;">
-  <h2 style="color:#1976d2;">CLICK ON THE QUESTION TO OPEN IT</h2>
+  <h2 style="color: #1976d2;">CLICK ON THE QUESTION TO OPEN IT</h2>
+  <hr style="border: 1px solid #ccc; margin: 20px 0;">
+
   <div class="board-toolbar">
     <div class="toolbar-group">
-      <button onclick="triggerRefresh()" style="background:#1976d2; color:white;">🔄 Refresh Board</button>
+      <button id="refreshBtn" onclick="triggerRefresh()" style="background: #1976d2; color: white;">
+        🔄 Refresh Board
+      </button>
+      <button id="toggleAnsweredBtn" onclick="toggleHideAnswered()" style="background: #546e7a; color: white;">
+        👁 Hide Answered
+      </button>
     </div>
     <div class="toolbar-group">
-      <button onclick="logoutStudent()" style="background:#d32f2f; color:white;">🚪 Log Out</button>
+      <button onclick="backToCategorySelection()" style="background: #f57c00; color: white;">
+        ⬅ Change Category
+      </button>
+      <button onclick="logoutStudent()" style="background: #d32f2f; color: white;">
+        🚪 Log Out
+      </button>
     </div>
   </div>
+
   <div id="grid" class="grid"></div>
   <br>
   <h3>🏆 Live Leaderboard</h3>
@@ -445,321 +458,321 @@ body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85
   <div id="options"></div>
   <div id="answerArea">
     <div id="mathToolbar" class="math-toolbar" style="display:none;">
-      <button onclick="insertAtCursor('x²')">x²</button><button onclick="insertAtCursor('√(')">√(</button>
-      <button onclick="insertAtCursor('π')">π</button><button onclick="insertAtCursor('Δ')">Δ</button>
-      <button onclick="insertAtCursor('±')">±</button><button onclick="insertAtCursor('\\frac{}{}')">frac</button>
+      <button onclick="insertAtCursor('x²')">x²</button>
+      <button onclick="insertAtCursor('x³')">x³</button>
+      <button onclick="insertAtCursor('√(')">√(</button>
+      <button onclick="insertAtCursor('π')">π</button>
+      <button onclick="insertAtCursor('θ')">θ</button>
+      <button onclick="insertAtCursor('Δ')">Δ</button>
+      <button onclick="insertAtCursor('∑')">∑</button>
+      <button onclick="insertAtCursor('∫')">∫</button>
+      <button onclick="insertAtCursor('±')">±</button>
+      <button onclick="insertAtCursor('÷')">÷</button>
+      <button onclick="insertAtCursor('½')">½</button>
+      <button onclick="insertAtCursor('∞')">∞</button>
+      <button onclick="insertAtCursor('^')">^</button>
+      <button onclick="insertAtCursor('_')">_</button>
+      <button onclick="insertAtCursor('\\frac{}{}')">frac</button>
+      <button onclick="insertAtCursor('\\sqrt{}')">sqrt</button>
     </div>
-    <textarea id="textAnswer" rows="3" placeholder="Type your answer here..." style="display:none;"></textarea>
-    <button id="submitBtn" onclick="submitAnswerUI()">Submit Answer</button>
+    <div id="mathPreview" class="math-preview"></div>
+    <textarea id="textAnswer" rows="3" placeholder="Type your answer here... (Ctrl+Enter to submit)" style="display:none;"></textarea>
+    <button id="submitBtn" onclick="submitAnswerUI()">Submit Answer (Ctrl+Enter)</button>
     <div id="result" style="display:none;"></div>
   </div>
   <button id="backBtn" class="btn-secondary" onclick="backToBoard()">⬅ Back to Board</button>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════
-// CONFIG — set this to your Apps Script Web App /exec URL
-// ═══════════════════════════════════════════════════════════
-const API_BASE = "https://script.google.com/macros/s/AKfycbx96EfOEGIznqfoS12_eqTo747971g8Hj62AG786pyPdUIfh_sPiWMWbxozSvYniXYWVA/exec";
+// ═══════════════════════════════════════════
+// YOUR APPS SCRIPT WEB APP URL (Replace with your own)
+// ═══════════════════════════════════════════
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdIEoSOX7qamMsIapnCjIdHD-lK_Eww_j62N4CeHIs4Yw0O070unS7Pv0Jm4eT036tzg/exec";
 
-// ═══════════════════════════════════════════════════════════
-// API CLIENT — replaces google.script.run, since this page is
-// hosted on GitHub Pages (a different origin from Apps Script).
-// GET calls use JSONP (works fully offline-tolerant, no CORS issue).
-// Writes use POST with Content-Type: text/plain to dodge the CORS
-// preflight that Apps Script web apps can't answer.
-// ═══════════════════════════════════════════════════════════
-let _cbCounter = 0;
-function apiGet(fn, args) {
-  return new Promise((resolve, reject) => {
-    if (!navigator.onLine) { reject(new Error("OFFLINE")); return; }
-    const cbName = 'cq_cb_' + (_cbCounter++) + '_' + Date.now();
-    const script = document.createElement('script');
-    const timeout = setTimeout(() => { cleanup(); reject(new Error("Request timed out")); }, 15000);
-    function cleanup() { delete window[cbName]; script.remove(); clearTimeout(timeout); }
-    window[cbName] = function (res) {
-      cleanup();
-      if (res && res.error) reject(new Error(res.error)); else resolve(res.result);
+// ═══════════════════════════════════════════
+// JSONP CALL SERVER – Bypasses CORS
+// ═══════════════════════════════════════════
+function callServer(functionName, ...args) {
+  return new Promise(function(resolve, reject) {
+    const callbackName = 'jsonp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    window[callbackName] = function(data) {
+      delete window[callbackName];
+      document.body.removeChild(scriptTag);
+      if (data.error) {
+        reject(new Error(data.error));
+      } else {
+        resolve(data.result);
+      }
     };
-    script.src = API_BASE + '?callback=' + cbName + '&function=' + encodeURIComponent(fn) + '&args=' + encodeURIComponent(JSON.stringify(args || []));
-    script.onerror = () => { cleanup(); reject(new Error("Network error")); };
-    document.body.appendChild(script);
-  });
-}
-function apiPost(fn, args) {
-  if (!navigator.onLine) return Promise.reject(new Error("OFFLINE"));
-  return fetch(API_BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ function: fn, args: args || [] })
-  }).then(r => r.json()).then(res => {
-    if (res && res.error) throw new Error(res.error);
-    return res.result;
+    
+    const params = new URLSearchParams();
+    params.append('callback', callbackName);
+    params.append('function', functionName);
+    params.append('args', JSON.stringify(args));
+    
+    const scriptTag = document.createElement('script');
+    scriptTag.src = https://script.google.com/macros/s/AKfycbx96EfOEGIznqfoS12_eqTo747971g8Hj62AG786pyPdUIfh_sPiWMWbxozSvYniXYWVA/exec + '?' + params.toString();
+    scriptTag.onerror = function() {
+      delete window[callbackName];
+      document.body.removeChild(scriptTag);
+      reject(new Error('Network error — check your Apps Script deployment'));
+    };
+    
+    document.body.appendChild(scriptTag);
   });
 }
 
-// ═══════════════════════════════════════════════════════════
-// GLOBAL STATE
-// ═══════════════════════════════════════════════════════════
-let team = "", availableCategories = [], currentCategory = "", currentQuestion = "";
-let selectedAnswer = "", submitted = false, hideAnswered = false;
-let questionEndTimes = {}, currentTimerId = null, timerInterval = null;
-let proctoringRequired = false, proctoringActive = false, mediaStream = null;
-let snapshotInterval = null, cameraCheckInterval = null;
-let tabSwitchCount = 0, tabWarningShown = false;
-let quizLocked = false;
+// ═══════════════════════════════════════════
+// GLOBAL VARIABLES
+// ═══════════════════════════════════════════
+let proctoringActive = false;
+let mediaStream = null;
+let snapshotInterval = null;
+let audioRecorder = null;
+let audioChunks = [];
+let audioInterval = null;
+
+let team = "";
+let availableCategories = [];
+let currentCategory = "";
+let currentQuestion = "";
+let selectedAnswer = "";
+let submitted = false;
+let pollInterval = null;
+let hideAnswered = false;
+
+let questionEndTimes = {};
+let currentTimerId = null;
+let timerInterval = null;
+
+let tabSwitchEnabled = false;
+let tabSwitchCount = 0, tabWarningShown = false, autoSubmitted = false;
 let systemInterval = null;
 
-// ═══════════════════════════════════════════════════════════
-// MODULE B: OFFLINE CACHE + SYNC
-// ═══════════════════════════════════════════════════════════
-const LS_ANSWERS_KEY = () => 'cheese_pending_answers_' + team;
-const LS_ATTEMPT_KEY = () => 'cheese_attempt_id_' + team;
-let isOnline = navigator.onLine;
-let offlineSince = null;
-let graceTimer = null;
-const GRACE_PERIOD_MS = 2 * 60 * 1000;
-
-function cacheQuestions(categoryId, data) {
-  try { localStorage.setItem('cheese_quiz_' + categoryId, JSON.stringify(data)); } catch (e) {}
-}
-function getCachedQuestions(categoryId) {
-  try { return JSON.parse(localStorage.getItem('cheese_quiz_' + categoryId) || 'null'); } catch (e) { return null; }
-}
-function getPendingAnswers() {
-  try { return JSON.parse(localStorage.getItem(LS_ANSWERS_KEY()) || '[]'); } catch (e) { return []; }
-}
-function savePendingAnswers(list) { localStorage.setItem(LS_ANSWERS_KEY(), JSON.stringify(list)); }
-function saveAnswerLocally(entry) {
-  const list = getPendingAnswers();
-  list.push(entry);
-  savePendingAnswers(list);
-}
-function getAttemptId() {
-  let id = localStorage.getItem(LS_ATTEMPT_KEY());
-  if (!id) { id = (crypto.randomUUID ? crypto.randomUUID() : ('att_' + Date.now() + '_' + Math.random())); localStorage.setItem(LS_ATTEMPT_KEY(), id); }
-  return id;
-}
-function rotateAttemptId() { localStorage.removeItem(LS_ATTEMPT_KEY()); }
-
-// --- IndexedDB photo buffer ---
-let _idb = null;
-function openPhotoDB() {
-  return new Promise((resolve, reject) => {
-    if (_idb) { resolve(_idb); return; }
-    const req = indexedDB.open('cheese_quiz_photos', 1);
-    req.onupgradeneeded = () => req.result.createObjectStore('photos', { keyPath: 'id', autoIncrement: true });
-    req.onsuccess = () => { _idb = req.result; resolve(_idb); };
-    req.onerror = () => reject(req.error);
-  });
-}
-async function bufferPhoto(base64) {
-  try {
-    const db = await openPhotoDB();
-    const tx = db.transaction('photos', 'readwrite');
-    tx.objectStore('photos').add({ base64, ts: Date.now() });
-  } catch (e) { console.error('Photo buffer failed', e); }
-}
-async function getBufferedPhotos() {
-  try {
-    const db = await openPhotoDB();
-    return new Promise((resolve) => {
-      const tx = db.transaction('photos', 'readonly');
-      const req = tx.objectStore('photos').getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => resolve([]);
-    });
-  } catch (e) { return []; }
-}
-async function clearBufferedPhotos() {
-  try {
-    const db = await openPhotoDB();
-    const tx = db.transaction('photos', 'readwrite');
-    tx.objectStore('photos').clear();
-  } catch (e) {}
-}
-
-function showOfflineBanner(grace) {
-  const b = document.getElementById('offlineBanner');
-  b.style.display = 'block';
-  b.className = grace ? 'grace' : '';
-  b.textContent = grace
-    ? '⚠️ Still offline — quiz will auto-lock soon if connection is not restored'
-    : '📡 Offline Mode: Your progress is being saved locally and will sync automatically once you reconnect.';
-}
-function hideOfflineBanner() { document.getElementById('offlineBanner').style.display = 'none'; }
-
-function showSyncPill(text) {
-  const p = document.getElementById('syncPill');
-  p.style.display = 'block'; p.textContent = text;
-  setTimeout(() => { p.style.display = 'none'; }, 4000);
-}
-
-window.addEventListener('offline', function () {
-  isOnline = false; offlineSince = Date.now();
-  showOfflineBanner(false);
-  graceTimer = setTimeout(handleGracePeriodExpired, GRACE_PERIOD_MS);
-});
-window.addEventListener('online', function () {
-  isOnline = true; offlineSince = null;
-  if (graceTimer) { clearTimeout(graceTimer); graceTimer = null; }
-  hideOfflineBanner();
-  if (team) syncOfflineData();
-});
-
-function handleGracePeriodExpired() {
-  if (isOnline) return;
-  showOfflineBanner(true);
-  // Auto-submit whatever is showing locally, then lock — offline data is
-  // still preserved and will sync the moment connectivity returns.
-  if (currentQuestion && !submitted) {
-    const textBox = document.getElementById('textAnswer');
-    const ans = (textBox.style.display !== 'none' ? textBox.value : selectedAnswer) || 'NO ANSWER (offline grace period expired)';
-    saveAnswerLocally({ questionId: currentQuestion, categoryId: currentCategory, answer: ans, timestamp: new Date().toISOString() });
+// ═══════════════════════════════════════════
+// KEYBOARD SHORTCUTS & PROTECTION
+// ═══════════════════════════════════════════
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || (e.ctrlKey && e.key === 'u')) {
+    e.preventDefault(); return false;
   }
-  lockQuizUI('📡 Connection Lost', 'You were offline for more than 2 minutes. Your answers so far have been saved locally and will sync automatically once you reconnect. Please contact an invigilator.');
-}
-
-async function syncOfflineData() {
-  if (!team) return;
-  const pending = getPendingAnswers();
-  const photos = await getBufferedPhotos();
-  if (pending.length === 0 && photos.length === 0) return;
-  const attemptId = getAttemptId();
-  showSyncPill('🔄 Syncing ' + pending.length + ' answer(s), ' + photos.length + ' photo(s)...');
-  try {
-    const res = await apiPost('syncOfflineData', [team, attemptId, JSON.stringify(pending), JSON.stringify(photos.map(p => ({ base64: p.base64 })))]);
-    if (res && (res.success || res.alreadySynced)) {
-      savePendingAnswers([]);
-      await clearBufferedPhotos();
-      rotateAttemptId();
-      showSyncPill('✅ Synced successfully');
-      if (currentCategory) loadQuestionsForCategory(currentCategory);
-    } else {
-      showSyncPill('⚠️ Sync incomplete — will retry');
+  if (e.ctrlKey || e.metaKey) {
+    const key = e.key.toLowerCase();
+    if (key === 'c' || key === 'v' || key === 'x' || key === 'u') {
+      e.preventDefault(); return false;
     }
-  } catch (e) {
-    showSyncPill('❌ Sync failed — will retry when possible');
+  }
+  const isEnter = (e.key === 'Enter' || e.code === 'Enter' || e.keyCode === 13);
+  if ((e.ctrlKey || e.shiftKey) && isEnter) {
+    const qbox = document.getElementById('questionBox');
+    const isVisible = qbox && window.getComputedStyle(qbox).display !== 'none';
+    if (isVisible && typeof submitted !== 'undefined' && !submitted) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof submitAnswerUI === 'function') submitAnswerUI();
+    }
+  }
+});
+
+// ═══════════════════════════════════════════
+// MATH TOOLBAR FUNCTIONS
+// ═══════════════════════════════════════════
+function insertAtCursor(text) {
+  const ta = document.getElementById('textAnswer');
+  if (!ta) return;
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  ta.value = ta.value.substring(0, start) + text + ta.value.substring(end);
+  ta.selectionStart = ta.selectionEnd = start + text.length;
+  ta.focus();
+  updateMathPreviewDebounced();
+}
+
+let previewTimeout;
+function updateMathPreviewDebounced() {
+  clearTimeout(previewTimeout);
+  previewTimeout = setTimeout(updateMathPreview, 150);
+}
+
+function updateMathPreview() {
+  const ta = document.getElementById('textAnswer');
+  const preview = document.getElementById('mathPreview');
+  if (!preview || !ta) return;
+  const text = ta.value.trim();
+  if (!text) {
+    preview.style.display = 'none';
+    preview.innerHTML = '';
+    return;
+  }
+  preview.style.display = 'block';
+  preview.innerHTML = '\\(' + text + '\\)';
+  if (window.MathJax) {
+    MathJax.typesetPromise([preview]).catch(err => console.log('MathJax error:', err));
+  } else {
+    preview.textContent = text;
   }
 }
 
-function lockQuizUI(title, msg) {
-  quizLocked = true;
-  stopGlobalTimer();
-  if (currentTimerId) delete questionEndTimes[currentTimerId];
-  document.getElementById('integrityLockTitle').textContent = title;
-  document.getElementById('integrityLockMsg').textContent = msg;
-  document.getElementById('integrityLock').style.display = 'block';
-  document.getElementById('questionBox').style.display = 'none';
-  document.getElementById('board').style.display = 'none';
+function showMathToolbar() {
+  document.getElementById('mathToolbar').style.display = 'flex';
+  document.getElementById('mathPreview').style.display = 'none';
+  const ta = document.getElementById('textAnswer');
+  if (ta) ta.addEventListener('input', updateMathPreviewDebounced);
 }
 
-// ═══════════════════════════════════════════════════════════
-// MODULE A: CAMERA INTEGRITY
-// ═══════════════════════════════════════════════════════════
-function preQuizCameraCheck() {
-  document.getElementById('cameraGate').style.display = 'block';
-  document.getElementById('cameraGateMsg').textContent = 'This quiz requires camera access for integrity monitoring. Please allow camera access and try again.';
-  navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(function (stream) {
-    document.getElementById('cameraGate').style.display = 'none';
-    mediaStream = stream;
+function hideMathToolbar() {
+  document.getElementById('mathToolbar').style.display = 'none';
+  document.getElementById('mathPreview').style.display = 'none';
+  const ta = document.getElementById('textAnswer');
+  if (ta) ta.removeEventListener('input', updateMathPreviewDebounced);
+}
+
+// ═══════════════════════════════════════════
+// PROCTORING FUNCTIONS
+// ═══════════════════════════════════════════
+function requestProctoringPermission() {
+  document.getElementById('consentOverlay').style.display = 'block';
+}
+
+document.getElementById('consentAllowBtn').addEventListener('click', async function() {
+  document.getElementById('consentOverlay').style.display = 'none';
+  try {
+    mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     proctoringActive = true;
+    
     const video = document.getElementById('camPreview');
-    video.srcObject = stream;
+    video.srcObject = mediaStream;
     document.getElementById('camPreviewContainer').style.display = 'block';
-    startCameraMonitoring();
+    
+    snapshotInterval = setInterval(captureAndUploadSnapshot, 10000);
+    startAudioRecording();
+    audioInterval = setInterval(() => {
+      stopAndUploadAudio();
+      startAudioRecording();
+    }, 30000);
+    
     showCategoriesAfterLogin();
-  }).catch(function (err) {
-    document.getElementById('cameraGateMsg').textContent = 'Camera access is required to start. Please enable camera permissions in your browser and refresh.';
-  });
-}
-function retryCameraCheck() { preQuizCameraCheck(); }
+  } catch (err) {
+    alert('Could not access camera/microphone: ' + err.message + '\n\nProctoring is required. Returning to home.');
+    denyProctoring();
+  }
+});
 
-function startCameraMonitoring() {
-  if (snapshotInterval) clearInterval(snapshotInterval);
-  if (cameraCheckInterval) clearInterval(cameraCheckInterval);
-  snapshotInterval = setInterval(captureAndBufferSnapshot, 5000);
-  cameraCheckInterval = setInterval(checkCameraLive, 5000);
+document.getElementById('consentDenyBtn').addEventListener('click', function() {
+  alert('Proctoring is required for this quiz. Returning to home.');
+  denyProctoring();
+});
+
+function denyProctoring() {
+  document.getElementById('consentOverlay').style.display = 'none';
+  stopProctoring();
+  goBackToHome();
 }
-function checkCameraLive() {
-  if (!proctoringActive || quizLocked) return;
-  const track = mediaStream && mediaStream.getVideoTracks()[0];
-  const ok = mediaStream && mediaStream.active && track && track.enabled && track.readyState === 'live';
-  if (!ok) triggerIntegrityViolation('Camera_Disabled', 'Camera track became inactive or was disabled.');
+
+function showCategoriesAfterLogin() {
+  document.getElementById("categorySelection").style.display = "block";
+  showCategorySelection();
+  enableTabDetection();
+  startGlobalTimer();
 }
-function captureAndBufferSnapshot() {
-  if (!proctoringActive || !mediaStream || quizLocked) return;
+
+function captureAndUploadSnapshot() {
+  if (!proctoringActive || !mediaStream) return;
   const video = document.getElementById('camPreview');
   if (!video.videoWidth) return;
   const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-  const base64 = canvas.toDataURL('image/jpeg', 0.5).split(',')[1];
-  if (isOnline) {
-    apiPost('saveProctoringSnapshot', [team, base64]).catch(() => bufferPhoto(base64));
-  } else {
-    bufferPhoto(base64);
+  canvas.width = video.videoWidth || 320;
+  canvas.height = video.videoHeight || 240;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const imageData = canvas.toDataURL('image/jpeg', 0.5);
+  const base64 = imageData.split(',')[1];
+  callServer('saveProctoringSnapshot', team, base64).catch(e => console.error('Snapshot upload failed:', e));
+}
+
+function startAudioRecording() {
+  if (!proctoringActive || !mediaStream) return;
+  const audioTrack = mediaStream.getAudioTracks()[0];
+  if (!audioTrack) return;
+  const audioStream = new MediaStream([audioTrack]);
+  audioChunks = [];
+  try {
+    audioRecorder = new MediaRecorder(audioStream, { mimeType: 'audio/webm' });
+  } catch (e) {
+    audioRecorder = new MediaRecorder(audioStream);
+  }
+  audioRecorder.ondataavailable = e => {
+    if (e.data.size > 0) audioChunks.push(e.data);
+  };
+  audioRecorder.onstop = () => {
+    if (audioChunks.length > 0) {
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      const reader = new FileReader();
+      reader.onloadend = function() {
+        const base64 = reader.result.split(',')[1];
+        callServer('saveProctoringAudio', team, base64).catch(e => console.error('Audio upload failed:', e));
+      };
+      reader.readAsDataURL(blob);
+      audioChunks = [];
+    }
+  };
+  audioRecorder.start();
+}
+
+function stopAndUploadAudio() {
+  if (audioRecorder && audioRecorder.state === 'recording') {
+    audioRecorder.stop();
   }
 }
+
+function toggleCamPreview() {
+  const preview = document.getElementById('camPreviewContainer');
+  preview.style.display = (preview.style.display === 'none') ? 'block' : 'none';
+}
+
 function stopProctoring() {
   proctoringActive = false;
   if (snapshotInterval) { clearInterval(snapshotInterval); snapshotInterval = null; }
-  if (cameraCheckInterval) { clearInterval(cameraCheckInterval); cameraCheckInterval = null; }
-  if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+  if (audioInterval) { clearInterval(audioInterval); audioInterval = null; }
+  if (audioRecorder && audioRecorder.state === 'recording') {
+    audioRecorder.stop();
+  }
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(track => track.stop());
+  }
   document.getElementById('camPreviewContainer').style.display = 'none';
   mediaStream = null;
 }
 
-document.addEventListener('visibilitychange', function () {
-  if (!proctoringRequired || quizLocked) return;
-  if (document.hidden) {
-    tabSwitchCount++;
-    tabWarningShown = true;
-    const warningDiv = document.getElementById('tabWarning');
-    const countSpan = document.getElementById('tabWarningCount');
-    countSpan.textContent = tabSwitchCount >= 2 ? '⚠️ SUBMITTING NOW' : 'Warning ' + tabSwitchCount + ' of 2';
-    warningDiv.style.display = 'block';
-    if (tabSwitchCount >= 2) triggerIntegrityViolation('Tab_Switch_Limit', 'Student switched tabs/windows 2 times.');
-  } else if (tabWarningShown) {
-    setTimeout(() => { document.getElementById('tabWarning').style.display = 'none'; tabWarningShown = false; }, 3000);
-  }
-});
-
-function triggerIntegrityViolation(event, detail) {
-  if (quizLocked) return;
-  quizLocked = true;
-  // A4: auto-submit whatever is on screen right now
-  if (currentQuestion && !submitted) {
-    const textBox = document.getElementById('textAnswer');
-    const ans = (textBox.style.display !== 'none' ? textBox.value : selectedAnswer) || 'NO ANSWER (auto-submitted)';
-    if (isOnline) {
-      apiPost('submitAnswer', [team, currentCategory, currentQuestion, ans]).catch(() => saveAnswerLocally({ questionId: currentQuestion, categoryId: currentCategory, answer: ans, timestamp: new Date().toISOString() }));
-    } else {
-      saveAnswerLocally({ questionId: currentQuestion, categoryId: currentCategory, answer: ans, timestamp: new Date().toISOString() });
-    }
-  }
-  // A5: integrity log (falls back to local queue if offline; synced later)
-  const logCall = () => apiPost('logIntegrityEvent', [team, currentCategory, event, detail]);
-  if (isOnline) { logCall().catch(() => {}); }
-  stopProctoring();
-  lockQuizUI('🚫 Quiz Submitted', 'Quiz submitted due to a camera/tab integrity violation: ' + detail);
+// ═══════════════════════════════════════════
+// PERSISTENT TIMER LOGIC
+// ═══════════════════════════════════════════
+function startGlobalTimer() {
+  if (timerInterval) return;
+  timerInterval = setInterval(checkTimers, 1000);
 }
 
-// ═══════════════════════════════════════════════════════════
-// TIMER
-// ═══════════════════════════════════════════════════════════
-function startGlobalTimer() { if (!timerInterval) timerInterval = setInterval(checkTimers, 1000); }
-function stopGlobalTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+function stopGlobalTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
 function checkTimers() {
   const now = Date.now();
   for (const [qid, endTime] of Object.entries(questionEndTimes)) {
     if (now >= endTime) {
       delete questionEndTimes[qid];
       if (currentQuestion === qid && !submitted) {
-        document.getElementById('timerDisplay').innerHTML = '⏰ TIME UP';
-        const textBox = document.getElementById('textAnswer');
-        if (textBox.style.display !== 'none') { if (!textBox.value.trim()) textBox.value = 'NO ANSWER'; }
-        else if (!selectedAnswer) selectedAnswer = 'NO ANSWER';
+        document.getElementById("timerDisplay").innerHTML = "⏰ TIME UP";
+        const textBox = document.getElementById("textAnswer");
+        if (textBox.style.display !== "none") {
+          if (textBox.value.trim() === "") textBox.value = "NO ANSWER";
+        } else {
+          if (selectedAnswer === "") selectedAnswer = "NO ANSWER";
+        }
         submitAnswerUI();
       }
       break;
@@ -767,255 +780,719 @@ function checkTimers() {
   }
   if (currentTimerId && questionEndTimes[currentTimerId]) {
     const remaining = Math.max(0, Math.ceil((questionEndTimes[currentTimerId] - now) / 1000));
-    document.getElementById('timerDisplay').innerHTML = '⏱ ' + remaining + 's';
+    document.getElementById("timerDisplay").innerHTML = "⏱ " + remaining + "s";
   } else {
-    document.getElementById('timerDisplay').innerHTML = '⏱ --';
+    document.getElementById("timerDisplay").innerHTML = "⏱ --";
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-// MATH TOOLBAR
-// ═══════════════════════════════════════════════════════════
-function insertAtCursor(text) {
-  const ta = document.getElementById('textAnswer'); if (!ta) return;
-  const s = ta.selectionStart, e = ta.selectionEnd;
-  ta.value = ta.value.substring(0, s) + text + ta.value.substring(e);
-  ta.selectionStart = ta.selectionEnd = s + text.length; ta.focus();
-}
-function showMathToolbar() { document.getElementById('mathToolbar').style.display = 'flex'; }
-function hideMathToolbar() { document.getElementById('mathToolbar').style.display = 'none'; }
-
-// ═══════════════════════════════════════════════════════════
-// LOGIN / REGISTRATION
-// ═══════════════════════════════════════════════════════════
-function showRegistrationForm() { document.getElementById('login').style.display = 'none'; document.getElementById('registrationForm').style.display = 'block'; }
-function showLogin() { document.getElementById('registrationForm').style.display = 'none'; document.getElementById('login').style.display = 'block'; }
-function submitRegistration() {
-  const t = document.getElementById('regTeam').value.trim(), p = document.getElementById('regPass').value.trim();
-  const l = document.getElementById('regLevel').value, c = document.getElementById('regCategory').value;
-  if (!t || !p) { document.getElementById('regMessage').innerHTML = '❌ Please fill all fields.'; return; }
-  apiPost('submitRegistration', [t, p, l, c]).then(msg => { document.getElementById('regMessage').innerHTML = msg; })
-    .catch(e => { document.getElementById('regMessage').innerHTML = '❌ ' + e.message; });
+// ═══════════════════════════════════════════
+// EXTRACT GOOGLE DRIVE FILE ID
+// ═══════════════════════════════════════════
+function extractDriveFileId(input) {
+  if (!input || input.trim() === '') return null;
+  if (input.includes('drive.google.com')) {
+    const match = input.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) return match[1];
+    const idMatch = input.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (idMatch && idMatch[1]) return idMatch[1];
+    const ucMatch = input.match(/uc\?id=([a-zA-Z0-9_-]+)/);
+    if (ucMatch && ucMatch[1]) return ucMatch[1];
+  }
+  const rawMatch = input.match(/^([a-zA-Z0-9_-]{25,})/);
+  if (rawMatch && rawMatch[1]) return rawMatch[1];
+  if (input.startsWith('http://') || input.startsWith('https://')) return input;
+  return null;
 }
 
-function startQuiz() {
-  team = document.getElementById('team').value.trim();
-  const password = document.getElementById('password').value.trim();
-  const startBtn = document.getElementById('startBtn');
-  if (!team || !password) { alert('Enter Team Name and Password'); return; }
-  startBtn.disabled = true; startBtn.innerHTML = '⏳ Checking...'; startBtn.style.background = 'orange';
-  apiPost('verifyTeam', [team, password]).then(function (res) {
-    if (!res.success) {
-      document.getElementById('loginMessage').innerHTML = '❌ ' + res.message;
-      document.getElementById('loginMessage').style.color = 'red';
-      startBtn.disabled = false; startBtn.innerHTML = 'Continue ➡'; startBtn.style.background = '#1976d2';
-      return;
+// ═══════════════════════════════════════════
+// TAB SWITCH DETECTION
+// ═══════════════════════════════════════════
+function enableTabDetection() {
+  if (tabSwitchEnabled) return;
+  tabSwitchEnabled = true;
+  document.addEventListener('visibilitychange', onVisibilityChange);
+}
+function disableTabDetection() {
+  tabSwitchEnabled = false;
+  document.removeEventListener('visibilitychange', onVisibilityChange);
+  document.getElementById('tabWarning').style.display = 'none';
+  tabWarningShown = false;
+}
+function onVisibilityChange() {
+  if (!tabSwitchEnabled) return;
+  if (document.hidden) {
+    tabSwitchCount++;
+    tabWarningShown = true;
+    const warningDiv = document.getElementById('tabWarning');
+    const countSpan = document.getElementById('tabWarningCount');
+    if (tabSwitchCount >= 2) {
+      countSpan.textContent = '⚠️ AUTO-SUBMITTING ON NEXT SWITCH!';
+      countSpan.style.color = '#ff4444';
+    } else {
+      countSpan.textContent = 'Warning ' + tabSwitchCount + ' of 1';
     }
-    availableCategories = res.availableCategories || [];
-    document.getElementById('login').style.display = 'none';
-    apiGet('getProctoringStatus', []).then(function (isOn) {
-      proctoringRequired = !!isOn;
-      if (proctoringRequired) preQuizCameraCheck(); else showCategoriesAfterLogin();
-    }).catch(() => showCategoriesAfterLogin());
-  }).catch(function (err) {
-    startBtn.disabled = false; startBtn.innerHTML = 'Continue ➡'; startBtn.style.background = '#1976d2';
-    document.getElementById('loginMessage').innerHTML = '❌ Network error. Try again.';
-  });
+    warningDiv.style.display = 'block';
+    if (tabSwitchCount >= 2) autoSubmitOnTabSwitch();
+  } else {
+    if (tabWarningShown) {
+      setTimeout(() => {
+        document.getElementById('tabWarning').style.display = 'none';
+        tabWarningShown = false;
+      }, 3000);
+    }
+  }
+}
+function autoSubmitOnTabSwitch() {
+  if (document.getElementById('questionBox').style.display === 'block' && !submitted && !autoSubmitted) {
+    autoSubmitted = true;
+    if (currentQuestion) delete questionEndTimes[currentQuestion];
+    const textBox = document.getElementById('textAnswer');
+    let answer = textBox.style.display !== 'none' ? (textBox.value || 'No answer (tab switched - auto-submitted)') : (selectedAnswer || 'No answer selected (tab switched - auto-submitted)');
+    document.getElementById('result').innerHTML = '⏳ <strong>AUTO-SUBMITTED</strong> - You switched tabs.';
+    document.getElementById('result').className = 'result-box result-pending';
+    document.getElementById('result').style.display = 'block';
+    callServer('submitAnswer', team, currentCategory, currentQuestion, answer)
+      .then(() => {
+        submitted = true;
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').innerHTML = '📤 Auto-Submitted';
+        loadLeaderboard(currentCategory);
+        loadQuestionsForCategory(currentCategory);
+      })
+      .catch(err => console.error('Auto-submit failed:', err));
+  }
 }
 
-function showCategoriesAfterLogin() {
-  document.getElementById('categorySelection').style.display = 'block';
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function goToSelectedLogin() {
+  const role = document.getElementById("userRole").value;
+  if (role === "participant") {
+    document.getElementById("landingPage").style.display = "none";
+    document.getElementById("login").style.display = "block";
+  } else if (role === "admin") {
+    document.getElementById("landingPage").style.display = "none";
+    document.getElementById("adminLogin").style.display = "block";
+  } else {
+    alert("Please select a role from the drop-down menu first.");
+  }
+}
+function goBackToHome() {
+  stopGlobalTimer();
+  disableTabDetection();
+  hideMathToolbar();
+  stopProctoring();
+  document.getElementById("login").style.display = "none";
+  document.getElementById("adminLogin").style.display = "none";
+  document.getElementById("registrationForm").style.display = "none";
+  document.getElementById("board").style.display = "none";
+  document.getElementById("questionBox").style.display = "none";
+  document.getElementById("categorySelection").style.display = "none";
+  document.getElementById("landingPage").style.display = "block";
+  document.getElementById("userRole").value = "none";
+  document.getElementById("team").value = '';
+  document.getElementById("password").value = '';
+  team = '';
+}
+function backToCategorySelection() {
+  stopGlobalTimer();
+  clearInterval(systemInterval);
+  disableTabDetection();
+  hideMathToolbar();
+  document.getElementById("board").style.display = "none";
+  document.getElementById("questionBox").style.display = "none";
+  document.getElementById("categorySelection").style.display = "block";
   showCategorySelection();
-  startGlobalTimer();
+}
+function showRegistrationForm() {
+  document.getElementById("login").style.display = "none";
+  document.getElementById("registrationForm").style.display = "block";
+}
+function showLogin() {
+  document.getElementById("registrationForm").style.display = "none";
+  document.getElementById("login").style.display = "block";
 }
 function logoutStudent() {
-  stopGlobalTimer(); stopProctoring();
-  document.getElementById('board').style.display = 'none';
-  document.getElementById('categorySelection').style.display = 'none';
-  team = ''; document.getElementById('team').value = ''; document.getElementById('password').value = '';
-  document.getElementById('login').style.display = 'block';
+  stopGlobalTimer();
+  clearInterval(systemInterval);
+  disableTabDetection();
+  hideMathToolbar();
+  stopProctoring();
+  document.getElementById("board").style.display = "none";
+  document.getElementById("questionBox").style.display = "none";
+  document.getElementById("categorySelection").style.display = "none";
+  team = "";
+  document.getElementById("team").value = "";
+  document.getElementById("password").value = "";
+  goBackToHome();
 }
 
-// ═══════════════════════════════════════════════════════════
-// CATEGORY / BOARD
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// ADMIN LOGIN
+// ═══════════════════════════════════════════
+function startAdmin() {
+  const pass = document.getElementById("adminPassword").value.trim();
+  const btn = document.querySelector("#adminLogin button");
+  btn.disabled = true;
+  btn.innerHTML = "⏳ Verifying...";
+  btn.style.background = "orange";
+  callServer("verifyAdminPassword", pass)
+    .then(ok => {
+      if (ok) {
+        localStorage.setItem('jetsAdminAccess', 'granted');
+        localStorage.setItem('jetsAdminTimestamp', String(Date.now()));
+        sessionStorage.setItem('jetsAdminAccess', 'granted');
+        return callServer("getWebAppUrl");
+      } else {
+        throw new Error("Wrong password");
+      }
+    })
+    .then(url => {
+      window.top.location.href = url + "?page=admin";
+    })
+    .catch(error => {
+      btn.disabled = false;
+      btn.innerHTML = "Access Dashboard";
+      btn.style.background = "#d32f2f";
+      alert("Error: " + error.message);
+    });
+}
+
+// ═══════════════════════════════════════════
+// PARTICIPANT LOGIN (with proctoring check)
+// ═══════════════════════════════════════════
+function startQuiz() {
+  team = document.getElementById("team").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const startBtn = document.getElementById("startBtn");
+  startBtn.disabled = true; startBtn.innerHTML = "⏳ Checking..."; startBtn.style.background = "orange";
+  if(!team || !password){
+    alert("Enter Team Name and Password");
+    startBtn.disabled = false; startBtn.innerHTML = "Continue"; startBtn.style.background = "#1976d2";
+    return;
+  }
+  callServer("verifyTeam", team, password)
+    .then(res => {
+      if(!res.success){
+        document.getElementById("loginMessage").innerHTML = "❌ " + res.message;
+        document.getElementById("loginMessage").style.color = "red";
+        startBtn.disabled = false; startBtn.innerHTML = "Continue"; startBtn.style.background = "#1976d2";
+        return;
+      }
+      document.getElementById("startBtn").innerHTML = "✔ Accepted";
+      document.getElementById("startBtn").style.background = "green";
+      document.getElementById("startBtn").disabled = true;
+      document.getElementById("loginMessage").innerHTML = "✔ ACCESS GRANTED";
+      document.getElementById("login").style.display = "none";
+      availableCategories = res.availableCategories || [];
+      
+      return callServer("getProctoringStatus").then(isProctoringOn => {
+        if (isProctoringOn) {
+          requestProctoringPermission();
+        } else {
+          showCategoriesAfterLogin();
+        }
+      });
+    })
+    .catch(error => {
+      startBtn.disabled = false; startBtn.innerHTML = "Continue"; startBtn.style.background = "#1976d2";
+      document.getElementById("loginMessage").innerHTML = "❌ Network error. Try again.";
+      document.getElementById("loginMessage").style.color = "red";
+    });
+}
+
+// ═══════════════════════════════════════════
+// REGISTRATION
+// ═══════════════════════════════════════════
+function submitRegistration() {
+  const t = document.getElementById("regTeam").value.trim();
+  const p = document.getElementById("regPass").value.trim();
+  const l = document.getElementById("regLevel").value;
+  const c = document.getElementById("regCategory").value;
+  if (!t || !p) { document.getElementById("regMessage").innerHTML = "❌ Please fill all fields."; return; }
+  callServer("submitRegistration", t, p, l, c)
+    .then(msg => document.getElementById("regMessage").innerHTML = msg)
+    .catch(err => document.getElementById("regMessage").innerHTML = "❌ Error: " + err.message);
+}
+
+// ═══════════════════════════════════════════
+// CATEGORY SELECTION
+// ═══════════════════════════════════════════
 function showCategorySelection() {
-  const c = document.getElementById('categoryList'); c.innerHTML = '';
-  if (!availableCategories.length) { c.innerHTML = "<p style='color:#999;'>No categories available.</p>"; return; }
-  availableCategories.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = 'category-btn';
-    btn.innerHTML = (cat.type === 'Quiz' ? '📝 ' : '🏅 ') + cat.name + `<span class="badge">${cat.level} • ${cat.type}</span>`;
-    btn.onclick = () => selectCategory(cat.id);
-    c.appendChild(btn);
+  const container = document.getElementById("categoryList");
+  container.innerHTML = "";
+  if (!availableCategories || availableCategories.length === 0) {
+    container.innerHTML = "<p style='color: #999;'>No categories available.</p>";
+    return;
+  }
+  availableCategories.forEach(function(cat) {
+    const btn = document.createElement("button");
+    btn.className = "category-btn";
+    const icon = cat.type === 'Quiz' ? '📝' : '🏅';
+    btn.innerHTML = `${icon} ${cat.name}<span class="badge">${cat.level} • ${cat.type}</span>`;
+    btn.onclick = function() { selectCategory(cat.id); };
+    container.appendChild(btn);
   });
 }
 function selectCategory(categoryId) {
   currentCategory = categoryId;
-  document.getElementById('categorySelection').style.display = 'none';
-  document.getElementById('board').style.display = 'block';
+  document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById("categorySelection").style.display = "none";
+  document.getElementById("board").style.display = "block";
   loadQuestionsForCategory(categoryId);
+  startSystemListener();
   checkSystemState();
   systemInterval = setInterval(checkSystemState, 3000);
 }
 
+// ═══════════════════════════════════════════
+// HIDE / SHOW ANSWERED QUESTIONS
+// ═══════════════════════════════════════════
+function toggleHideAnswered() {
+  hideAnswered = !hideAnswered;
+  document.getElementById('toggleAnsweredBtn').textContent = hideAnswered ? '👁 Show Answered' : '👁 Hide Answered';
+  loadQuestionsForCategory(currentCategory);
+}
+
+// ═══════════════════════════════════════════
+// LOAD QUESTIONS FOR CATEGORY
+// ═══════════════════════════════════════════
 function loadQuestionsForCategory(categoryId) {
-  loadLeaderboard(categoryId);
-  const render = (data) => {
-    cacheQuestions(categoryId, data);
-    renderGrid(data, categoryId);
-  };
-  apiGet('getQuestionsForCategory', [team, categoryId]).then(render).catch(function () {
-    const cached = getCachedQuestions(categoryId);
-    if (cached) { render(cached); showSyncPill('📴 Showing cached questions (offline)'); }
-    else alert('❌ Could not load questions and no offline copy is cached yet.');
-  });
-}
-function renderGrid(data, categoryId) {
-  const grid = document.getElementById('grid'); grid.innerHTML = '';
-  const pendingIds = new Set(getPendingAnswers().map(a => a.questionId));
-  data.forEach(q => {
-    const locallyAnswered = pendingIds.has(q.id);
-    if (hideAnswered && (q.locked || locallyAnswered)) return;
-    const btn = document.createElement('button');
-    btn.className = 'question-btn'; btn.dataset.id = q.id;
-    btn.innerHTML = (q.locked ? '✓ ' : locallyAnswered ? '⏳ ' : '') + q.id;
-    btn.disabled = q.locked;
-    btn.onclick = () => { if (!btn.disabled) openQuestion(q.id, categoryId); };
-    grid.appendChild(btn);
-  });
-}
-function triggerRefresh() { loadQuestionsForCategory(currentCategory); }
-
-function checkSystemState() {
-  apiGet('getSystemState', []).then(function (state) {
-    const msg = document.getElementById('systemMessage'), overlay = document.getElementById('pauseOverlay');
-    if (state.Status === 'Emergency') {
-      overlay.style.display = 'block'; overlay.innerHTML = '🚨 EMERGENCY STOP – Quiz halted';
-      document.getElementById('questionBox').style.display = 'none'; return;
-    }
-    if (state.QuizActive === 'false') {
-      overlay.style.display = 'block'; overlay.innerHTML = '⏸ The quiz round has not started yet.';
-      document.getElementById('questionBox').style.display = 'none'; return;
-    }
-    if (state.Status === 'Paused') {
-      msg.style.display = 'block'; msg.style.background = '#d32f2f'; msg.style.color = 'white';
-      msg.innerHTML = '⛔ <b>QUIZ PAUSED</b> | 📢 ' + (state.Broadcast || 'Waiting...'); return;
-    }
-    overlay.style.display = 'none';
-    if (state.Broadcast) { msg.style.display = 'block'; msg.style.background = '#ffeb3b'; msg.style.color = 'black'; msg.innerHTML = '📢 ' + state.Broadcast; }
-    else msg.style.display = 'none';
-    document.getElementById('leaderboard').style.display = state.ShowLeaderboard === 'false' ? 'none' : 'block';
-  }).catch(() => { /* offline: keep last known UI state, don't spam errors */ });
-}
-
-function loadLeaderboard(categoryId) {
-  apiGet('getLeaderboard', [categoryId]).then(function (data) {
-    let html = '<table><tr><th>Rank</th><th>Team</th><th>Score</th></tr>';
-    data.forEach((row, i) => {
-      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
-      html += `<tr><td>${medal} ${i + 1}</td><td>${row[0]}</td><td>${row[1]}</td></tr>`;
-    });
-    document.getElementById('leaderboard').innerHTML = html + '</table>';
-  }).catch(() => {});
-}
-
-// ═══════════════════════════════════════════════════════════
-// QUESTION FLOW
-// ═══════════════════════════════════════════════════════════
-function openQuestion(id, categoryId) {
-  currentQuestion = id; currentCategory = categoryId; submitted = false;
-  document.getElementById('questionImage').style.display = 'none';
-  document.getElementById('textAnswer').style.display = 'none'; document.getElementById('textAnswer').value = '';
-  document.getElementById('options').innerHTML = ''; document.getElementById('result').style.display = 'none';
-  document.getElementById('submitBtn').disabled = false; document.getElementById('submitBtn').innerHTML = 'Submit Answer';
-  selectedAnswer = '';
-  document.getElementById('questionBox').style.display = 'block'; document.getElementById('board').style.display = 'none';
-
-  const render = (q) => {
-    document.getElementById('questionText').innerText = q.question;
-    document.getElementById('pointsDisplay').innerHTML = '🏆 Points: ' + q.maxScore;
-    const seconds = Number(q.time) || 30;
-    questionEndTimes[id] = Date.now() + seconds * 1000; currentTimerId = id;
-    const type = String(q.type || '').toUpperCase();
-    const optionsDiv = document.getElementById('options');
-    if (type === 'MCQ') {
-      hideMathToolbar();
-      ['optionA', 'optionB', 'optionC', 'optionD'].forEach(key => {
-        if (q[key]) {
-          const b = document.createElement('button'); b.innerHTML = q[key];
-          b.onclick = () => { document.querySelectorAll('#options button').forEach(x => x.classList.remove('selected')); b.classList.add('selected'); selectedAnswer = key.slice(-1).toUpperCase(); };
-          optionsDiv.appendChild(b);
-        }
+  callServer("getQuestionsForCategory", team, categoryId)
+    .then(data => {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+      loadLeaderboard(categoryId);
+      const refBtn = document.getElementById("refreshBtn");
+      if (refBtn) {
+        refBtn.disabled = false;
+        refBtn.innerHTML = "🔄 Refresh Board";
+        refBtn.style.background = "#1976d2";
+      }
+      data.forEach(function(q) {
+        if (hideAnswered && q.locked) return;
+        let btn = document.createElement("button");
+        btn.className = "question-btn";
+        btn.dataset.id = q.id;
+        btn.innerHTML = q.locked ? "✓ " + q.id : q.id;
+        btn.disabled = q.locked;
+        btn.onclick = function() {
+          if (btn.disabled) return;
+          if (currentQuestion && currentQuestion !== q.id && !submitted) {
+            const textBox = document.getElementById("textAnswer");
+            let ans = textBox.style.display !== "none" ? (textBox.value || "NO ANSWER") : (selectedAnswer || "NO ANSWER");
+            submitAnswerForTimer(ans);
+            delete questionEndTimes[currentQuestion];
+          }
+          hideMathToolbar();
+          openQuestion(q.id, categoryId);
+        };
+        grid.appendChild(btn);
       });
-    } else {
-      document.getElementById('textAnswer').style.display = 'block'; showMathToolbar();
-    }
-  };
-
-  apiGet('getQuestionForCategory', [id, categoryId]).then(render).catch(function () {
-    const cached = getCachedQuestions(categoryId);
-    const q = cached && cached.find(x => x.id === id);
-    if (q) { render(q); showSyncPill('📴 Offline — using cached question'); }
-    else { alert('❌ Network error and no offline copy available.'); backToBoard(); }
-  });
+    })
+    .catch(error => {
+      alert("❌ " + error.message);
+      document.getElementById("board").style.display = "none";
+      document.getElementById("categorySelection").style.display = "block";
+      document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+    });
 }
 
-function submitAnswerUI() {
-  if (submitted || quizLocked) return;
-  submitted = true;
-  const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.innerHTML = '⏳ Submitting...';
-  if (currentQuestion) delete questionEndTimes[currentQuestion];
-  const textBox = document.getElementById('textAnswer');
-  const answer = textBox.style.display !== 'none' ? textBox.value : selectedAnswer;
-  if (!answer || !answer.trim()) {
-    document.getElementById('result').innerHTML = '⚠️ Please provide an answer before submitting.';
-    document.getElementById('result').className = 'result-pending'; document.getElementById('result').style.display = 'block';
-    btn.disabled = false; btn.innerHTML = 'Submit Answer'; submitted = false; return;
+// ═══════════════════════════════════════════
+// SYSTEM STATE
+// ═══════════════════════════════════════════
+function startSystemListener() {
+  function fetchState() {
+    callServer("getSystemState").then(state => {
+      if (state.ActiveQuestion) {
+        let rawTarget = String(state.ActiveQuestion).trim().toUpperCase();
+        let targetList = rawTarget.split(",").map(item => item.trim());
+        document.querySelectorAll(".question-btn").forEach(btn => {
+          let btnId = String(btn.dataset.id).trim().toUpperCase();
+          let isMatched = targetList.some(target => btnId === target || btnId.replace("Q","") === target.replace("Q",""));
+          btn.style.display = (rawTarget === "ALL" || isMatched) ? "inline-block" : "none";
+        });
+      }
+      document.getElementById("leaderboard").style.display = (state.ShowLeaderboard === "false") ? "none" : "block";
+    }).catch(e => console.error(e));
   }
+  fetchState();
+  setInterval(fetchState, 5000);
+}
+function checkSystemState(){
+  callServer("getSystemState")
+    .then(state => {
+      const msg = document.getElementById("systemMessage");
+      const overlay = document.getElementById("pauseOverlay");
+      if (state.Status === "Emergency") {
+        stopGlobalTimer();
+        overlay.style.display = "block";
+        overlay.innerHTML = "🚨 EMERGENCY STOP – Quiz halted";
+        document.querySelectorAll("button").forEach(btn => btn.disabled = true);
+        document.getElementById("questionBox").style.display = "none";
+        document.getElementById("board").style.display = "none";
+        document.body.classList.add("banner-visible");
+        return;
+      }
+      if (state.QuizActive === "false") {
+        stopGlobalTimer();
+        overlay.style.display = "block";
+        overlay.innerHTML = "⏸ The quiz round has not started yet.";
+        document.querySelectorAll("button").forEach(btn => btn.disabled = true);
+        document.getElementById("questionBox").style.display = "none";
+        document.getElementById("board").style.display = "none";
+        document.body.classList.add("banner-visible");
+        return;
+      }
+      if (state.Status === "Paused") {
+        stopGlobalTimer();
+        overlay.style.display = "none";
+        msg.style.display = "block";
+        msg.style.background = "#d32f2f";
+        msg.style.color = "white";
+        msg.innerHTML = "⛔ <b>QUIZ PAUSED</b> | 📢 " + (state.Broadcast || "Waiting...");
+        document.querySelectorAll("button").forEach(btn => btn.disabled = true);
+        document.body.classList.add("banner-visible");
+        return;
+      }
+      overlay.style.display = "none";
+      document.querySelectorAll("button").forEach(btn => btn.disabled = false);
+      startGlobalTimer();
+      if (state.Broadcast && String(state.Broadcast).trim() !== "") {
+        msg.style.display = "block";
+        msg.style.background = "#ffeb3b";
+        msg.style.color = "black";
+        msg.innerHTML = "📢 " + state.Broadcast;
+        document.body.classList.add("banner-visible");
+      } else {
+        msg.style.display = "none";
+        document.body.classList.remove("banner-visible");
+      }
+    })
+    .catch(e => console.error(e));
+}
 
-  const entry = { questionId: currentQuestion, categoryId: currentCategory, answer, timestamp: new Date().toISOString() };
+// ═══════════════════════════════════════════
+// LEADERBOARD
+// ═══════════════════════════════════════════
+function loadLeaderboard(categoryId) {
+  callServer("getLeaderboard", categoryId)
+    .then(data => {
+      let html = "<table><tr><th>Rank</th><th>Team</th><th>Score</th></tr>";
+      for(let i=0; i<data.length; i++){
+        const medal = i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : '';
+        html += `<tr><td style='padding:10px; font-weight: bold;'>${medal}${i+1}</td><td style='padding:10px; font-weight: bold;'>${data[i][0]}</td><td style='padding:10px; color: #388e3c; font-weight: bold;'>${data[i][1]}</td></tr>`;
+      }
+      html += "</table>";
+      document.getElementById("leaderboard").innerHTML = html;
+    })
+    .catch(e => console.error(e));
+}
 
-  if (!isOnline) {
-    // Module B2: save locally, don't block on network at all
-    saveAnswerLocally(entry);
-    document.getElementById('result').innerHTML = '📴 <strong>Saved offline.</strong> Will submit automatically once you reconnect.';
-    document.getElementById('result').className = 'result-pending'; document.getElementById('result').style.display = 'block';
-    btn.innerHTML = '📴 Saved Offline';
-    loadQuestionsForCategory(currentCategory);
+// ═══════════════════════════════════════════
+// OPEN QUESTION
+// ═══════════════════════════════════════════
+function openQuestion(id, categoryId) {
+  currentQuestion = id;
+  currentCategory = categoryId;
+  submitted = false;
+  autoSubmitted = false;
+  hideMathToolbar();
+
+  if (questionEndTimes[id] && Date.now() < questionEndTimes[id]) {
+    currentTimerId = id;
+    document.getElementById("questionBox").style.display = "block";
+    document.getElementById("board").style.display = "none";
     return;
   }
 
-  apiPost('submitAnswer', [team, currentCategory, currentQuestion, answer]).then(function (res) {
-    let html = '';
-    if (res.duplicate) { html = '⚠️ Already answered. Correct: ' + (res.correctAnswer || 'N/A'); document.getElementById('result').className = 'result-wrong'; }
-    else if (res.pending) { html = '⏳ AI grading in progress...'; document.getElementById('result').className = 'result-pending'; }
-    else if (res.correct) { html = '✅ <strong>CORRECT!</strong> +' + res.score + ' Points'; document.getElementById('result').className = 'result-correct'; }
-    else { html = '❌ <strong>WRONG</strong>. Correct: ' + (res.correctAnswer || 'N/A'); document.getElementById('result').className = 'result-wrong'; }
-    document.getElementById('result').innerHTML = html; document.getElementById('result').style.display = 'block';
-    loadLeaderboard(currentCategory); loadQuestionsForCategory(currentCategory);
-  }).catch(function () {
-    // Network failed even though navigator.onLine said we were online
-    // (flaky wifi) — fall back to the offline queue rather than losing the answer.
-    saveAnswerLocally(entry);
-    document.getElementById('result').innerHTML = '📴 Connection issue — saved locally, will retry automatically.';
-    document.getElementById('result').className = 'result-pending'; document.getElementById('result').style.display = 'block';
-    btn.innerHTML = '📴 Saved Offline';
-  });
+  document.getElementById("questionImage").style.display = "none";
+  document.getElementById("questionImage").innerHTML = "";
+  document.getElementById("questionText").innerText = "";
+  document.getElementById("pointsDisplay").innerHTML = "";
+  document.getElementById("timerDisplay").innerHTML = "⏱ ...";
+  document.getElementById("options").innerHTML = "";
+  document.getElementById("textAnswer").style.display = "none";
+  document.getElementById("textAnswer").value = "";
+  document.getElementById("result").style.display = "none";
+  document.getElementById("result").innerHTML = "";
+  document.getElementById("submitBtn").disabled = false;
+  document.getElementById("submitBtn").innerHTML = "Submit Answer (Ctrl+Enter)";
+  document.getElementById("submitBtn").style.background = "#1976d2";
+  selectedAnswer = "";
+
+  document.getElementById("questionBox").style.display = "block";
+  document.getElementById("board").style.display = "none";
+
+  callServer("getQuestionForCategory", id, categoryId)
+    .then(q => {
+      const imageDiv = document.getElementById("questionImage");
+      if (q.image && q.image.trim() !== "") {
+        const extracted = extractDriveFileId(q.image.trim());
+        if (extracted && extracted.startsWith('http')) {
+          imageDiv.style.display = "block";
+          imageDiv.innerHTML = `<img src="${extracted}" alt="Question Image" style="max-width: 100%; max-height: 300px;">`;
+        } else if (extracted) {
+          imageDiv.style.display = "block";
+          imageDiv.innerHTML = `<div style="text-align:center; padding:20px;">⏳ Loading image...</div>`;
+          callServer("getImageData", extracted)
+            .then(result => {
+              if (result.success) imageDiv.innerHTML = `<img src="${result.dataUrl}" alt="Question Image" style="max-width: 100%; max-height: 300px;">`;
+              else imageDiv.innerHTML = `<div style="color:#d32f2f;">❌ Image not available</div>`;
+            })
+            .catch(e => imageDiv.innerHTML = `<div style="color:#d32f2f;">❌ Image loading error</div>`);
+        } else {
+          imageDiv.style.display = "none";
+        }
+      } else imageDiv.style.display = "none";
+
+      document.getElementById("questionText").innerText = q.question;
+      document.getElementById("pointsDisplay").innerHTML = "🏆 Points: " + q.maxScore;
+
+      const seconds = Number(q.time) || 30;
+      questionEndTimes[id] = Date.now() + (seconds * 1000);
+      currentTimerId = id;
+
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+      selectedAnswer = "";
+      const questionType = String(q.type || "").trim().toUpperCase();
+
+      if (questionType === "MCQ"){
+        document.getElementById("textAnswer").style.display = "none";
+        document.getElementById("submitBtn").style.display = "block";
+        hideMathToolbar();
+        ["optionA", "optionB", "optionC", "optionD"].forEach(function(key){
+          if(q[key]){
+            let optBtn = document.createElement("button");
+            optBtn.innerHTML = q[key];
+            optBtn.onclick = function(){
+              document.querySelectorAll("#options button").forEach(b => b.classList.remove("selected"));
+              optBtn.classList.add("selected");
+              selectedAnswer = key.slice(-1).toUpperCase();
+            };
+            optionsDiv.appendChild(optBtn);
+          }
+        });
+      } else {
+        document.getElementById("textAnswer").style.display = "block";
+        document.getElementById("submitBtn").style.display = "block";
+        document.getElementById("textAnswer").value = "";
+        showMathToolbar();
+        document.getElementById("textAnswer").focus();
+        const ta = document.getElementById("textAnswer");
+        ta.style.height = "auto";
+        ta.style.height = (ta.scrollHeight) + "px";
+        ta.addEventListener("input", function() {
+          this.style.height = "auto";
+          this.style.height = (this.scrollHeight) + "px";
+        });
+      }
+    })
+    .catch(error => {
+      alert("❌ Network error. Returning to board.");
+      backToBoard();
+    });
 }
+
+// ═══════════════════════════════════════════
+// SUBMIT ANSWER HELPERS
+// ═══════════════════════════════════════════
+function submitAnswerForTimer(answer) {
+  callServer("submitAnswer", team, currentCategory, currentQuestion, answer)
+    .then(() => { 
+      loadQuestionsForCategory(currentCategory); 
+      loadLeaderboard(currentCategory); 
+    })
+    .catch(e => console.error(e));
+}
+
+function submitAnswerUI() {
+  if(submitted) return;
+  submitted = true;
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.innerHTML = "⏳ Submitting...";
+  btn.style.background = "orange";
+  
+  if (currentQuestion) delete questionEndTimes[currentQuestion];
+  currentTimerId = null;
+  hideMathToolbar();
+
+  let answer = "";
+  const textBox = document.getElementById("textAnswer");
+  if(textBox.style.display !== "none") answer = textBox.value;
+  else answer = selectedAnswer;
+
+  if (!answer || answer.trim() === "" || answer.trim() === "NO ANSWER") {
+    if (answer.trim() !== "NO ANSWER") {
+      document.getElementById("result").innerHTML = "⚠️ Please provide an answer before submitting.";
+      document.getElementById("result").className = "result-box result-pending";
+      document.getElementById("result").style.display = "block";
+      btn.disabled = false;
+      btn.innerHTML = "Submit Answer (Ctrl+Enter)";
+      btn.style.background = "#1976d2";
+      submitted = false;
+      return;
+    }
+  }
+
+  callServer("submitAnswer", team, currentCategory, currentQuestion, answer)
+    .then(res => {
+      let resultHTML = "";
+      if (res.duplicate) {
+        resultHTML = "⚠️ Question already answered.<br>";
+        resultHTML += "📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided");
+        btn.innerHTML = "Rejected"; btn.style.background = "#d32f2f";
+        document.getElementById("result").className = "result-box result-wrong";
+      } else if (res.pending && res.aiGrading) {
+        resultHTML = "⏳ <strong>AI Grading in Progress...</strong><br>";
+        resultHTML += "📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>";
+        resultHTML += "✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
+        btn.innerHTML = "⏳ Grading..."; btn.style.background = "#f57c00";
+        document.getElementById("result").className = "result-box result-pending";
+        startPollingForResult(team, currentCategory, currentQuestion);
+      } else if (res.correct) {
+        resultHTML = "✅ <strong>CORRECT!</strong> +" + res.score + " Points<br>";
+        resultHTML += "📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>";
+        resultHTML += "✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
+        btn.innerHTML = "✅ Correct!"; btn.style.background = "#388e3c";
+        document.getElementById("result").className = "result-box result-correct";
+      } else {
+        resultHTML = "❌ <strong>WRONG</strong><br>";
+        resultHTML += "📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>";
+        resultHTML += "✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
+        btn.innerHTML = "❌ Wrong"; btn.style.background = "#d32f2f";
+        document.getElementById("result").className = "result-box result-wrong";
+      }
+      document.getElementById("result").innerHTML = resultHTML;
+      document.getElementById("result").style.display = "block";
+      loadLeaderboard(currentCategory);
+      loadQuestionsForCategory(currentCategory);
+    })
+    .catch(error => {
+      submitted = false;
+      btn.disabled = false;
+      btn.innerHTML = "Submit Answer (Ctrl+Enter)";
+      btn.style.background = "#1976d2";
+      document.getElementById("result").innerHTML = "❌ Network error. Submission failed.";
+      document.getElementById("result").className = "result-box result-wrong";
+      document.getElementById("result").style.display = "block";
+      alert("Submission failed. Try again.");
+      loadQuestionsForCategory(currentCategory);
+    });
+}
+
+// ═══════════════════════════════════════════
+// AI POLLING
+// ═══════════════════════════════════════════
+function startPollingForResult(team, categoryId, qid) {
+  let attempts = 0;
+  const maxAttempts = 20;
+  if (pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(function() {
+    attempts++;
+    callServer("getAIResult", team, categoryId, qid)
+      .then(result => {
+        if (result.completed) {
+          clearInterval(pollInterval);
+          let resultHTML = "";
+          if (result.correct) {
+            resultHTML = "✅ <strong>AI GRADING COMPLETE!</strong> +" + result.score + " Points<br>";
+            document.getElementById("result").className = "result-box result-correct";
+          } else {
+            resultHTML = "❌ <strong>AI GRADING COMPLETE!</strong><br>";
+            document.getElementById("result").className = "result-box result-wrong";
+          }
+          resultHTML += "📖 <strong>Correct Answer:</strong> " + (result.correctAnswer || "") + "<br>";
+          resultHTML += "✏️ <strong>Your Answer:</strong> " + (result.yourAnswer || "");
+          document.getElementById("result").innerHTML = resultHTML;
+          document.getElementById("result").style.display = "block";
+          const btn = document.getElementById("submitBtn");
+          btn.innerHTML = result.correct ? "✅ Correct!" : "❌ Wrong";
+          btn.style.background = result.correct ? "#388e3c" : "#d32f2f";
+          loadLeaderboard(categoryId);
+        }
+      })
+      .catch(e => console.error(e));
+    if (attempts >= maxAttempts) {
+      clearInterval(pollInterval);
+      document.getElementById("result").innerHTML += "<br><em style='color:#f57c00;'>⏳ AI grading taking longer than expected.</em>";
+      document.getElementById("result").style.display = "block";
+    }
+  }, 3000);
+}
+
+// ═══════════════════════════════════════════
+// BACK TO BOARD
+// ═══════════════════════════════════════════
 function backToBoard() {
-  document.getElementById('questionBox').style.display = 'none';
-  document.getElementById('board').style.display = 'block';
-  loadQuestionsForCategory(currentCategory); loadLeaderboard(currentCategory);
+  document.getElementById("questionBox").style.display = "none";
+  document.getElementById("board").style.display = "block";
+  loadQuestionsForCategory(currentCategory);
+  loadLeaderboard(currentCategory);
 }
 
-// consent overlay wiring (kept for browsers where autoplay/permission UX differs)
-document.getElementById('consentAllowBtn').addEventListener('click', function () { preQuizCameraCheck(); document.getElementById('consentOverlay').style.display = 'none'; });
-document.getElementById('consentDenyBtn').addEventListener('click', function () { alert('Camera access is required for this quiz.'); document.getElementById('consentOverlay').style.display = 'none'; });
-
-// periodic background sync attempt in case the 'online' event was missed
-setInterval(function () { if (navigator.onLine && team) syncOfflineData(); }, 20000);
+// ═══════════════════════════════════════════
+// PASSWORD TOGGLE & REFRESH
+// ═══════════════════════════════════════════
+function toggleParticipantPassword() {
+  document.getElementById("password").type = document.getElementById("password").type === "password" ? "text" : "password";
+}
+function toggleAdminPassword() {
+  document.getElementById("adminPassword").type = document.getElementById("adminPassword").type === "password" ? "text" : "password";
+}
+function triggerRefresh() {
+  const btn = document.getElementById("refreshBtn");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = "⏳ Updating...";
+    btn.style.background = "orange";
+  }
+  loadQuestionsForCategory(currentCategory);
+}
 </script>
 
+<!-- Auto-close warning banner (Apps Script iframe) -->
+<script>
+(function() {
+  var style = document.createElement('style');
+  style.textContent = `#warning-bar, #docs-banner, .docs-banner, .gux-message-bar, iframe[src*="warning"] { display: none !important; }`;
+  document.head.appendChild(style);
+  function clickClose() {
+    var selectors = [
+      '#warning-bar [role="button"]', '#docs-banner [role="button"]',
+      '.docs-banner [role="button"]', '.gux-message-bar [role="button"]',
+      'div[aria-label*="close" i]', 'div[aria-label*="dismiss" i]',
+      'button[aria-label*="close" i]', 'button[aria-label*="dismiss" i]',
+      '.dismiss-button', '.close-button', '[data-tooltip="Close"]', '[title="Close"]',
+      '.goog-flat-menu-button'
+    ];
+    for (var i = 0; i < selectors.length; i++) {
+      var el = document.querySelector(selectors[i]);
+      if (el) { el.click(); return true; }
+    }
+    var all = document.querySelectorAll('*');
+    for (var j = 0; j < all.length; j++) {
+      if (all[j].children.length === 0 && (all[j].textContent.trim() === '×' || all[j].textContent.trim() === '✕')) {
+        all[j].click();
+        return true;
+      }
+    }
+    return false;
+  }
+  var attempts = 0, maxAttempts = 10;
+  var interval = setInterval(function() {
+    if (clickClose() || ++attempts >= maxAttempts) clearInterval(interval);
+  }, 200);
+  var observer = new MutationObserver(function() {
+    if (clickClose()) { observer.disconnect(); clearInterval(interval); }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
 </body>
 </html>
