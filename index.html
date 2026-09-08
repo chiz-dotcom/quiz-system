@@ -328,6 +328,8 @@ body.banner-visible #questionBox { margin-top: 70px; min-height: calc(100vh - 85
     <textarea id="textAnswer" rows="3" placeholder="Type your answer here... (Ctrl+Enter to submit)" style="display:none;"></textarea>
     <button id="submitBtn" onclick="submitAnswerUI()">Submit Answer (Ctrl+Enter)</button>
     <div id="result" style="display:none;"></div>
+    <div id="aiStatus" style="display:none; margin-top:8px; font-size:14px; color:#e65100; text-align:center;"></div>
+    <button id="checkStatusBtn" style="display:none; margin:8px auto; background:#f57c00; color:white; padding:8px 16px; border:none; border-radius:6px; cursor:pointer; font-weight:600;" onclick="manualCheckAIStatus()">🔄 Check Status Now</button>
   </div>
   <button id="backBtn" class="btn-secondary" onclick="backToBoard()">⬅ Back to Board</button>
 </div>
@@ -596,11 +598,15 @@ let tabWarningShown = false;
 let autoSubmitted = false;
 let systemInterval = null;
 
-// Flag to indicate if a question is currently open (for anti-clipboard)
 let questionActive = false;
 
+// AI polling state
+let aiPollingActive = false;
+let aiPollingAttempts = 0;
+let aiPollingMaxAttempts = 9999; // effectively infinite
+
 // ═══════════════════════════════════════════
-// ANTI-CLIPBOARD & CONTEXT MENU LOCK (when question is open)
+// ANTI-CLIPBOARD & CONTEXT MENU LOCK
 // ═══════════════════════════════════════════
 function preventClipboardActions(e) {
   if (questionActive) {
@@ -614,7 +620,6 @@ document.addEventListener('copy', preventClipboardActions);
 document.addEventListener('cut', preventClipboardActions);
 document.addEventListener('paste', preventClipboardActions);
 
-// Also specifically on the textarea to catch direct events
 const textAnswerEl = document.getElementById('textAnswer');
 if (textAnswerEl) {
   textAnswerEl.addEventListener('copy', preventClipboardActions);
@@ -630,7 +635,6 @@ document.addEventListener('keydown', function (e) {
     e.preventDefault();
     return false;
   }
-  // Block Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+U globally (redundant but safe)
   if (e.ctrlKey || e.metaKey) {
     const key = e.key.toLowerCase();
     if (key === 'c' || key === 'v' || key === 'x' || key === 'u') {
@@ -1019,7 +1023,8 @@ function triggerIntegrityViolation(eventName, detail) {
 function lockQuizUI(title, msg) {
   quizLocked = true;
   stopGlobalTimer();
-  questionActive = false; // no question is active anymore
+  questionActive = false;
+  stopAIPolling(); // stop any AI polling
   document.getElementById('integrityLockTitle').textContent = title;
   document.getElementById('integrityLockMsg').textContent = msg;
   document.getElementById('integrityLock').style.display = 'block';
@@ -1035,7 +1040,8 @@ function goBackToHome() {
   disableTabDetection();
   hideMathToolbar();
   stopProctoring();
-  questionActive = false; // question closed
+  questionActive = false;
+  stopAIPolling();
   document.getElementById("landingPage").style.display = "block";
   document.getElementById("login").style.display = "block";
   document.getElementById("registrationForm").style.display = "none";
@@ -1057,7 +1063,8 @@ function backToCategorySelection() {
   clearInterval(systemInterval);
   disableTabDetection();
   hideMathToolbar();
-  questionActive = false; // question closed
+  questionActive = false;
+  stopAIPolling();
   document.getElementById("board").style.display = "none";
   document.getElementById("questionBox").style.display = "none";
   document.getElementById("categorySelection").style.display = "block";
@@ -1081,6 +1088,7 @@ function logoutStudent() {
   hideMathToolbar();
   stopProctoring();
   questionActive = false;
+  stopAIPolling();
   document.getElementById("board").style.display = "none";
   document.getElementById("questionBox").style.display = "none";
   document.getElementById("categorySelection").style.display = "none";
@@ -1349,16 +1357,113 @@ function loadLeaderboard(categoryId) {
 }
 
 // ═══════════════════════════════════════════
+// AI POLLING (improved)
+// ═══════════════════════════════════════════
+function stopAIPolling() {
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
+  aiPollingActive = false;
+  document.getElementById('checkStatusBtn').style.display = 'none';
+  document.getElementById('aiStatus').style.display = 'none';
+}
+
+function startPollingForResult(team, categoryId, qid) {
+  aiPollingAttempts = 0;
+  aiPollingActive = true;
+  document.getElementById('aiStatus').style.display = 'block';
+  document.getElementById('aiStatus').innerHTML = '⏳ AI Grading in progress... (will check every 3 seconds)';
+  document.getElementById('checkStatusBtn').style.display = 'none';
+
+  if (pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(function() {
+    aiPollingAttempts++;
+    callServer("getAIResult", team, categoryId, qid).then(function(result) {
+      if (result.completed) {
+        clearInterval(pollInterval);
+        aiPollingActive = false;
+        document.getElementById('checkStatusBtn').style.display = 'none';
+        document.getElementById('aiStatus').style.display = 'none';
+        let resultHTML = "";
+        if (result.correct) {
+          resultHTML = "✅ <strong>AI GRADING COMPLETE!</strong> +" + result.score + " Points<br>";
+          document.getElementById("result").className = "result-box result-correct";
+        } else {
+          resultHTML = "❌ <strong>AI GRADING COMPLETE!</strong><br>";
+          document.getElementById("result").className = "result-box result-wrong";
+        }
+        resultHTML += "📖 <strong>Correct Answer:</strong> " + (result.correctAnswer || "") + "<br>✏️ <strong>Your Answer:</strong> " + (result.yourAnswer || "");
+        document.getElementById("result").innerHTML = resultHTML;
+        document.getElementById("result").style.display = "block";
+        const btn = document.getElementById("submitBtn");
+        btn.innerHTML = result.correct ? "✅ Correct!" : "❌ Wrong";
+        btn.style.background = result.correct ? "#388e3c" : "#d32f2f";
+        loadLeaderboard(categoryId);
+        return; // stop polling
+      }
+
+      // Update status message based on elapsed time
+      let msg = '⏳ AI Grading in progress... ';
+      if (aiPollingAttempts > 20) { // after ~60 seconds
+        msg += ' (taking longer than expected – we\'ll keep checking)';
+        document.getElementById('checkStatusBtn').style.display = 'inline-block';
+      }
+      if (aiPollingAttempts > 40) { // after ~120 seconds
+        msg += ' You can close this question and come back later; we\'ll update when ready.';
+      }
+      document.getElementById('aiStatus').innerHTML = msg;
+    }).catch(function() {
+      // network error – continue polling
+    });
+  }, 3000);
+}
+
+function manualCheckAIStatus() {
+  if (aiPollingActive && currentQuestion) {
+    document.getElementById('aiStatus').innerHTML = '🔄 Manual check requested...';
+    callServer("getAIResult", team, currentCategory, currentQuestion).then(function(result) {
+      if (result.completed) {
+        // same as completion logic above
+        clearInterval(pollInterval);
+        aiPollingActive = false;
+        document.getElementById('checkStatusBtn').style.display = 'none';
+        document.getElementById('aiStatus').style.display = 'none';
+        let resultHTML = "";
+        if (result.correct) {
+          resultHTML = "✅ <strong>AI GRADING COMPLETE!</strong> +" + result.score + " Points<br>";
+          document.getElementById("result").className = "result-box result-correct";
+        } else {
+          resultHTML = "❌ <strong>AI GRADING COMPLETE!</strong><br>";
+          document.getElementById("result").className = "result-box result-wrong";
+        }
+        resultHTML += "📖 <strong>Correct Answer:</strong> " + (result.correctAnswer || "") + "<br>✏️ <strong>Your Answer:</strong> " + (result.yourAnswer || "");
+        document.getElementById("result").innerHTML = resultHTML;
+        document.getElementById("result").style.display = "block";
+        const btn = document.getElementById("submitBtn");
+        btn.innerHTML = result.correct ? "✅ Correct!" : "❌ Wrong";
+        btn.style.background = result.correct ? "#388e3c" : "#d32f2f";
+        loadLeaderboard(currentCategory);
+      } else {
+        document.getElementById('aiStatus').innerHTML = '⏳ Still grading – will continue checking automatically.';
+      }
+    }).catch(function() {});
+  }
+}
+
+// ═══════════════════════════════════════════
 // OPEN QUESTION (with image-first loading)
 // ═══════════════════════════════════════════
 function openQuestion(id, categoryId) {
+  // Stop any previous AI polling
+  stopAIPolling();
+
   currentQuestion = id;
   currentCategory = categoryId;
   submitted = false;
   autoSubmitted = false;
   hideMathToolbar();
 
-  // Activate anti-clipboard lock
   questionActive = true;
 
   // Hide all question UI elements initially
@@ -1373,9 +1478,11 @@ function openQuestion(id, categoryId) {
   document.getElementById("submitBtn").disabled = false;
   document.getElementById("submitBtn").innerHTML = "Submit Answer (Ctrl+Enter)";
   document.getElementById("submitBtn").style.background = "#1976d2";
-  document.getElementById("answerArea").style.display = "none"; // hide until image is ready (or no image)
+  document.getElementById("answerArea").style.display = "none";
   document.getElementById("questionImage").style.display = "none";
   document.getElementById("imageLoadingMsg").style.display = "none";
+  document.getElementById("aiStatus").style.display = "none";
+  document.getElementById("checkStatusBtn").style.display = "none";
 
   // If the question is already timed out, reopen it fresh
   if (questionEndTimes[id] && Date.now() < questionEndTimes[id]) {
@@ -1384,8 +1491,7 @@ function openQuestion(id, categoryId) {
   }
 
   const renderQuestion = function(q) {
-    // Now render the question UI (called after image is loaded or if no image)
-    document.getElementById("answerArea").style.display = "block"; // show answer area
+    document.getElementById("answerArea").style.display = "block";
     document.getElementById("questionText").innerText = q.question;
     document.getElementById("pointsDisplay").innerHTML = "🏆 Points: " + q.maxScore;
     const seconds = Number(q.time) || 30;
@@ -1427,30 +1533,23 @@ function openQuestion(id, categoryId) {
     }
     document.getElementById("questionBox").style.display = "block";
     document.getElementById("board").style.display = "none";
-    // Re-trigger timer display
     checkTimers();
   };
 
-  // Get question data
   const onQuestionData = function(q) {
-    // Check if question has an image
     const imageField = q.image && q.image.trim();
     if (imageField) {
       const extracted = extractDriveFileId(imageField);
       if (extracted && !extracted.startsWith('http')) {
-        // Try to load image
         document.getElementById("imageLoadingMsg").style.display = "block";
         document.getElementById("imageLoadingMsg").innerHTML = "⏳ Loading image...";
-        // First check cache
         getCachedQuestionImage(extracted).then(function(cachedDataUrl) {
           if (cachedDataUrl) {
-            // Image found in cache – display it and render question
             document.getElementById("imageLoadingMsg").style.display = "none";
             document.getElementById("questionImage").style.display = "block";
             document.getElementById("questionImage").innerHTML = '<img src="' + cachedDataUrl + '" alt="Question Image" style="max-width: 100%; max-height: 300px;">';
             renderQuestion(q);
           } else {
-            // Not in cache – try to fetch online (if online)
             if (navigator.onLine) {
               callServer("getImageData", extracted).then(function(result) {
                 if (result.success) {
@@ -1461,16 +1560,13 @@ function openQuestion(id, categoryId) {
                   document.getElementById("questionImage").innerHTML = '<img src="' + dataUrl + '" alt="Question Image" style="max-width: 100%; max-height: 300px;">';
                   renderQuestion(q);
                 } else {
-                  // Image fetch failed
                   document.getElementById("imageLoadingMsg").innerHTML = '❌ Image not available. Please connect to a stable network and try again.';
                   document.getElementById("imageLoadingMsg").style.display = "block";
                   document.getElementById("questionBox").style.display = "block";
                   document.getElementById("board").style.display = "none";
-                  // Do not render the question – only show the message
                   document.getElementById("answerArea").style.display = "none";
                 }
               }).catch(function() {
-                // Offline or network error
                 document.getElementById("imageLoadingMsg").innerHTML = '❌ Image not available. Please connect to a stable network and try again.';
                 document.getElementById("imageLoadingMsg").style.display = "block";
                 document.getElementById("questionBox").style.display = "block";
@@ -1478,7 +1574,6 @@ function openQuestion(id, categoryId) {
                 document.getElementById("answerArea").style.display = "none";
               });
             } else {
-              // Offline and no cached image
               document.getElementById("imageLoadingMsg").innerHTML = '📴 This question requires an image. Please connect to a stable network to view it.';
               document.getElementById("imageLoadingMsg").style.display = "block";
               document.getElementById("questionBox").style.display = "block";
@@ -1487,21 +1582,18 @@ function openQuestion(id, categoryId) {
             }
           }
         });
-        return; // wait for image
+        return;
       } else {
-        // Direct URL (http) – show directly without caching, but still render question
         document.getElementById("questionImage").style.display = "block";
         document.getElementById("questionImage").innerHTML = '<img src="' + extracted + '" alt="Question Image" style="max-width: 100%; max-height: 300px;">';
         renderQuestion(q);
         return;
       }
     } else {
-      // No image – render immediately
       renderQuestion(q);
     }
   };
 
-  // Fetch question data
   callServer("getQuestionForCategory", id, categoryId)
     .then(onQuestionData)
     .catch(function(error) {
@@ -1569,10 +1661,12 @@ function submitAnswerUI() {
         resultHTML = "⚠️ Question already answered.<br>📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided");
         btn.innerHTML = "Rejected"; btn.style.background = "#d32f2f";
         document.getElementById("result").className = "result-box result-wrong";
+        // No AI polling needed
       } else if (res.pending && res.aiGrading) {
         resultHTML = "⏳ <strong>AI Grading in Progress...</strong><br>📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
         btn.innerHTML = "⏳ Grading..."; btn.style.background = "#f57c00";
         document.getElementById("result").className = "result-box result-pending";
+        // Start improved AI polling
         startPollingForResult(team, currentCategory, currentQuestion);
       } else if (res.correct) {
         resultHTML = "✅ <strong>CORRECT!</strong> +" + res.score + " Points<br>📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
@@ -1583,8 +1677,10 @@ function submitAnswerUI() {
         btn.innerHTML = "❌ Wrong"; btn.style.background = "#d32f2f";
         document.getElementById("result").className = "result-box result-wrong";
       }
-      document.getElementById("result").innerHTML = resultHTML;
-      document.getElementById("result").style.display = "block";
+      if (!res.pending) {
+        document.getElementById("result").innerHTML = resultHTML;
+        document.getElementById("result").style.display = "block";
+      }
       loadLeaderboard(currentCategory);
       loadQuestionsForCategory(currentCategory);
     })
@@ -1598,47 +1694,11 @@ function submitAnswerUI() {
 }
 
 // ═══════════════════════════════════════════
-// AI POLLING
-// ═══════════════════════════════════════════
-function startPollingForResult(team, categoryId, qid) {
-  let attempts = 0;
-  const maxAttempts = 20;
-  if (pollInterval) clearInterval(pollInterval);
-  pollInterval = setInterval(function() {
-    attempts++;
-    callServer("getAIResult", team, categoryId, qid).then(function(result) {
-      if (result.completed) {
-        clearInterval(pollInterval);
-        let resultHTML = "";
-        if (result.correct) {
-          resultHTML = "✅ <strong>AI GRADING COMPLETE!</strong> +" + result.score + " Points<br>";
-          document.getElementById("result").className = "result-box result-correct";
-        } else {
-          resultHTML = "❌ <strong>AI GRADING COMPLETE!</strong><br>";
-          document.getElementById("result").className = "result-box result-wrong";
-        }
-        resultHTML += "📖 <strong>Correct Answer:</strong> " + (result.correctAnswer || "") + "<br>✏️ <strong>Your Answer:</strong> " + (result.yourAnswer || "");
-        document.getElementById("result").innerHTML = resultHTML;
-        document.getElementById("result").style.display = "block";
-        const btn = document.getElementById("submitBtn");
-        btn.innerHTML = result.correct ? "✅ Correct!" : "❌ Wrong";
-        btn.style.background = result.correct ? "#388e3c" : "#d32f2f";
-        loadLeaderboard(categoryId);
-      }
-    }).catch(function() {});
-    if (attempts >= maxAttempts) {
-      clearInterval(pollInterval);
-      document.getElementById("result").innerHTML += "<br><em style='color:#f57c00;'>⏳ AI grading taking longer than expected.</em>";
-      document.getElementById("result").style.display = "block";
-    }
-  }, 3000);
-}
-
-// ═══════════════════════════════════════════
 // BACK TO BOARD
 // ═══════════════════════════════════════════
 function backToBoard() {
-  questionActive = false; // deactivate anti-clipboard lock
+  questionActive = false;
+  stopAIPolling(); // stop any ongoing AI polling
   document.getElementById("questionBox").style.display = "none";
   document.getElementById("board").style.display = "block";
   loadQuestionsForCategory(currentCategory);
