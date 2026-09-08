@@ -112,6 +112,7 @@ button:active { transform: scale(0.95); opacity: 0.9; transition: transform 0.1s
 #questionImage img { max-width: 100%; max-height: 280px; border-radius: 8px; border: 1px solid #e0e0e0; padding: 4px; background: white; }
 #questionText { font-size: 22px; margin-bottom: 12px; color: #1a1a2e; line-height: 1.6; }
 #imageLoadingMsg { text-align: center; padding: 20px; color: #666; }
+#imageLoadingMsg .retry-btn { margin-top: 10px; padding: 8px 16px; background: #1976d2; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
 
 #leaderboard table { margin: 15px auto; width: 90%; max-width: 600px; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 #leaderboard th { background: #263238; color: white; padding: 12px; font-weight: 600; }
@@ -604,6 +605,9 @@ let questionActive = false;
 let aiPollingActive = false;
 let aiPollingAttempts = 0;
 let aiPollingMaxAttempts = 9999; // effectively infinite
+
+// Store textarea resize handler to avoid duplicate listeners
+let textAnswerResizeHandler = null;
 
 // ═══════════════════════════════════════════
 // ANTI-CLIPBOARD & CONTEXT MENU LOCK
@@ -1182,15 +1186,15 @@ function showCategorySelection() {
     btn.className = "category-btn";
     const icon = cat.type === 'Quiz' ? '📝' : '🏅';
     btn.innerHTML = icon + ' ' + cat.name + '<span class="badge">' + cat.level + ' • ' + cat.type + '</span>';
-    btn.onclick = function() { selectCategory(cat.id); };
+    btn.onclick = function() { selectCategory(cat.id, this); };
     container.appendChild(btn);
   });
 }
 
-function selectCategory(categoryId) {
+function selectCategory(categoryId, btnElement) {
   currentCategory = categoryId;
   document.querySelectorAll('.category-btn').forEach(function(btn) { btn.classList.remove('active'); });
-  event.target.classList.add('active');
+  if (btnElement) btnElement.classList.add('active');
   document.getElementById("categorySelection").style.display = "none";
   document.getElementById("board").style.display = "block";
   loadQuestionsForCategory(categoryId);
@@ -1369,6 +1373,29 @@ function stopAIPolling() {
   document.getElementById('aiStatus').style.display = 'none';
 }
 
+// Refactored AI result handler to avoid duplication
+function displayAIResult(result) {
+  clearInterval(pollInterval);
+  aiPollingActive = false;
+  document.getElementById('checkStatusBtn').style.display = 'none';
+  document.getElementById('aiStatus').style.display = 'none';
+  let resultHTML = "";
+  if (result.correct) {
+    resultHTML = "✅ <strong>AI GRADING COMPLETE!</strong> +" + result.score + " Points<br>";
+    document.getElementById("result").className = "result-correct";
+  } else {
+    resultHTML = "❌ <strong>AI GRADING COMPLETE!</strong><br>";
+    document.getElementById("result").className = "result-wrong";
+  }
+  resultHTML += "📖 <strong>Correct Answer:</strong> " + (result.correctAnswer || "") + "<br>✏️ <strong>Your Answer:</strong> " + (result.yourAnswer || "");
+  document.getElementById("result").innerHTML = resultHTML;
+  document.getElementById("result").style.display = "block";
+  const btn = document.getElementById("submitBtn");
+  btn.innerHTML = result.correct ? "✅ Correct!" : "❌ Wrong";
+  btn.style.background = result.correct ? "#388e3c" : "#d32f2f";
+  loadLeaderboard(currentCategory);
+}
+
 function startPollingForResult(team, categoryId, qid) {
   aiPollingAttempts = 0;
   aiPollingActive = true;
@@ -1381,35 +1408,16 @@ function startPollingForResult(team, categoryId, qid) {
     aiPollingAttempts++;
     callServer("getAIResult", team, categoryId, qid).then(function(result) {
       if (result.completed) {
-        clearInterval(pollInterval);
-        aiPollingActive = false;
-        document.getElementById('checkStatusBtn').style.display = 'none';
-        document.getElementById('aiStatus').style.display = 'none';
-        let resultHTML = "";
-        if (result.correct) {
-          resultHTML = "✅ <strong>AI GRADING COMPLETE!</strong> +" + result.score + " Points<br>";
-          document.getElementById("result").className = "result-box result-correct";
-        } else {
-          resultHTML = "❌ <strong>AI GRADING COMPLETE!</strong><br>";
-          document.getElementById("result").className = "result-box result-wrong";
-        }
-        resultHTML += "📖 <strong>Correct Answer:</strong> " + (result.correctAnswer || "") + "<br>✏️ <strong>Your Answer:</strong> " + (result.yourAnswer || "");
-        document.getElementById("result").innerHTML = resultHTML;
-        document.getElementById("result").style.display = "block";
-        const btn = document.getElementById("submitBtn");
-        btn.innerHTML = result.correct ? "✅ Correct!" : "❌ Wrong";
-        btn.style.background = result.correct ? "#388e3c" : "#d32f2f";
-        loadLeaderboard(categoryId);
-        return; // stop polling
+        displayAIResult(result);
+        return;
       }
 
-      // Update status message based on elapsed time
       let msg = '⏳ AI Grading in progress... ';
-      if (aiPollingAttempts > 20) { // after ~60 seconds
+      if (aiPollingAttempts > 20) {
         msg += ' (taking longer than expected – we\'ll keep checking)';
         document.getElementById('checkStatusBtn').style.display = 'inline-block';
       }
-      if (aiPollingAttempts > 40) { // after ~120 seconds
+      if (aiPollingAttempts > 40) {
         msg += ' You can close this question and come back later; we\'ll update when ready.';
       }
       document.getElementById('aiStatus').innerHTML = msg;
@@ -1424,26 +1432,7 @@ function manualCheckAIStatus() {
     document.getElementById('aiStatus').innerHTML = '🔄 Manual check requested...';
     callServer("getAIResult", team, currentCategory, currentQuestion).then(function(result) {
       if (result.completed) {
-        // same as completion logic above
-        clearInterval(pollInterval);
-        aiPollingActive = false;
-        document.getElementById('checkStatusBtn').style.display = 'none';
-        document.getElementById('aiStatus').style.display = 'none';
-        let resultHTML = "";
-        if (result.correct) {
-          resultHTML = "✅ <strong>AI GRADING COMPLETE!</strong> +" + result.score + " Points<br>";
-          document.getElementById("result").className = "result-box result-correct";
-        } else {
-          resultHTML = "❌ <strong>AI GRADING COMPLETE!</strong><br>";
-          document.getElementById("result").className = "result-box result-wrong";
-        }
-        resultHTML += "📖 <strong>Correct Answer:</strong> " + (result.correctAnswer || "") + "<br>✏️ <strong>Your Answer:</strong> " + (result.yourAnswer || "");
-        document.getElementById("result").innerHTML = resultHTML;
-        document.getElementById("result").style.display = "block";
-        const btn = document.getElementById("submitBtn");
-        btn.innerHTML = result.correct ? "✅ Correct!" : "❌ Wrong";
-        btn.style.background = result.correct ? "#388e3c" : "#d32f2f";
-        loadLeaderboard(currentCategory);
+        displayAIResult(result);
       } else {
         document.getElementById('aiStatus').innerHTML = '⏳ Still grading – will continue checking automatically.';
       }
@@ -1484,10 +1473,8 @@ function openQuestion(id, categoryId) {
   document.getElementById("aiStatus").style.display = "none";
   document.getElementById("checkStatusBtn").style.display = "none";
 
-  // If the question is already timed out, reopen it fresh
   if (questionEndTimes[id] && Date.now() < questionEndTimes[id]) {
-    // we might have an active timer, but we'll re-render anyway
-    // reset timer later
+    // no action needed; timer will be updated later
   }
 
   const renderQuestion = function(q) {
@@ -1523,13 +1510,18 @@ function openQuestion(id, categoryId) {
       document.getElementById("textAnswer").value = "";
       showMathToolbar();
       document.getElementById("textAnswer").focus();
+      // Attach auto-resize handler (remove old one first)
       const ta = document.getElementById("textAnswer");
-      ta.style.height = "auto";
-      ta.style.height = ta.scrollHeight + "px";
-      ta.addEventListener("input", function() {
+      if (textAnswerResizeHandler) {
+        ta.removeEventListener("input", textAnswerResizeHandler);
+      }
+      textAnswerResizeHandler = function() {
         this.style.height = "auto";
         this.style.height = this.scrollHeight + "px";
-      });
+      };
+      ta.addEventListener("input", textAnswerResizeHandler);
+      ta.style.height = "auto";
+      ta.style.height = ta.scrollHeight + "px";
     }
     document.getElementById("questionBox").style.display = "block";
     document.getElementById("board").style.display = "none";
@@ -1541,6 +1533,7 @@ function openQuestion(id, categoryId) {
     if (imageField) {
       const extracted = extractDriveFileId(imageField);
       if (extracted && !extracted.startsWith('http')) {
+        // It's a Google Drive file ID
         document.getElementById("imageLoadingMsg").style.display = "block";
         document.getElementById("imageLoadingMsg").innerHTML = "⏳ Loading image...";
         getCachedQuestionImage(extracted).then(function(cachedDataUrl) {
@@ -1560,30 +1553,26 @@ function openQuestion(id, categoryId) {
                   document.getElementById("questionImage").innerHTML = '<img src="' + dataUrl + '" alt="Question Image" style="max-width: 100%; max-height: 300px;">';
                   renderQuestion(q);
                 } else {
-                  document.getElementById("imageLoadingMsg").innerHTML = '❌ Image not available. Please connect to a stable network and try again.';
+                  // Image failed but we still show question and allow answering
+                  document.getElementById("imageLoadingMsg").innerHTML = '❌ Image not available. You can still answer the question below. <button class="retry-btn" onclick="openQuestion(\'' + id + '\', \'' + categoryId + '\')">🔄 Retry Image</button>';
                   document.getElementById("imageLoadingMsg").style.display = "block";
-                  document.getElementById("questionBox").style.display = "block";
-                  document.getElementById("board").style.display = "none";
-                  document.getElementById("answerArea").style.display = "none";
+                  renderQuestion(q); // allow answering even without image
                 }
               }).catch(function() {
-                document.getElementById("imageLoadingMsg").innerHTML = '❌ Image not available. Please connect to a stable network and try again.';
+                document.getElementById("imageLoadingMsg").innerHTML = '❌ Image not available (network error). You can still answer the question below. <button class="retry-btn" onclick="openQuestion(\'' + id + '\', \'' + categoryId + '\')">🔄 Retry Image</button>';
                 document.getElementById("imageLoadingMsg").style.display = "block";
-                document.getElementById("questionBox").style.display = "block";
-                document.getElementById("board").style.display = "none";
-                document.getElementById("answerArea").style.display = "none";
+                renderQuestion(q);
               });
             } else {
-              document.getElementById("imageLoadingMsg").innerHTML = '📴 This question requires an image. Please connect to a stable network to view it.';
+              document.getElementById("imageLoadingMsg").innerHTML = '📴 This question requires an image, but you are offline. You can still answer below (image not visible). <button class="retry-btn" onclick="openQuestion(\'' + id + '\', \'' + categoryId + '\')">🔄 Retry</button>';
               document.getElementById("imageLoadingMsg").style.display = "block";
-              document.getElementById("questionBox").style.display = "block";
-              document.getElementById("board").style.display = "none";
-              document.getElementById("answerArea").style.display = "none";
+              renderQuestion(q);
             }
           }
         });
         return;
       } else {
+        // External URL or already a full URL
         document.getElementById("questionImage").style.display = "block";
         document.getElementById("questionImage").innerHTML = '<img src="' + extracted + '" alt="Question Image" style="max-width: 100%; max-height: 300px;">';
         renderQuestion(q);
@@ -1632,7 +1621,7 @@ function submitAnswerUI() {
   if (!answer || answer.trim() === "" || answer.trim() === "NO ANSWER") {
     if (answer.trim() !== "NO ANSWER") {
       document.getElementById("result").innerHTML = "⚠️ Please provide an answer before submitting.";
-      document.getElementById("result").className = "result-box result-pending";
+      document.getElementById("result").className = "result-pending";
       document.getElementById("result").style.display = "block";
       btn.disabled = false;
       btn.innerHTML = "Submit Answer (Ctrl+Enter)";
@@ -1647,7 +1636,7 @@ function submitAnswerUI() {
   if (!navigator.onLine) {
     saveAnswerLocally(entry);
     document.getElementById("result").innerHTML = "📴 <strong>Saved offline.</strong> Will submit automatically once you reconnect.";
-    document.getElementById("result").className = "result-box result-pending";
+    document.getElementById("result").className = "result-pending";
     document.getElementById("result").style.display = "block";
     btn.innerHTML = "📴 Saved Offline";
     loadQuestionsForCategory(currentCategory);
@@ -1660,22 +1649,20 @@ function submitAnswerUI() {
       if (res.duplicate) {
         resultHTML = "⚠️ Question already answered.<br>📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided");
         btn.innerHTML = "Rejected"; btn.style.background = "#d32f2f";
-        document.getElementById("result").className = "result-box result-wrong";
-        // No AI polling needed
+        document.getElementById("result").className = "result-wrong";
       } else if (res.pending && res.aiGrading) {
         resultHTML = "⏳ <strong>AI Grading in Progress...</strong><br>📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
         btn.innerHTML = "⏳ Grading..."; btn.style.background = "#f57c00";
-        document.getElementById("result").className = "result-box result-pending";
-        // Start improved AI polling
+        document.getElementById("result").className = "result-pending";
         startPollingForResult(team, currentCategory, currentQuestion);
       } else if (res.correct) {
         resultHTML = "✅ <strong>CORRECT!</strong> +" + res.score + " Points<br>📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
         btn.innerHTML = "✅ Correct!"; btn.style.background = "#388e3c";
-        document.getElementById("result").className = "result-box result-correct";
+        document.getElementById("result").className = "result-correct";
       } else {
         resultHTML = "❌ <strong>WRONG</strong><br>📖 <strong>Correct Answer:</strong> " + (res.correctAnswer || "Not provided") + "<br>✏️ <strong>Your Answer:</strong> " + (res.yourAnswer || answer);
         btn.innerHTML = "❌ Wrong"; btn.style.background = "#d32f2f";
-        document.getElementById("result").className = "result-box result-wrong";
+        document.getElementById("result").className = "result-wrong";
       }
       if (!res.pending) {
         document.getElementById("result").innerHTML = resultHTML;
@@ -1687,9 +1674,10 @@ function submitAnswerUI() {
     .catch(function(error) {
       saveAnswerLocally(entry);
       document.getElementById("result").innerHTML = "📴 Connection issue — saved locally, will retry automatically.";
-      document.getElementById("result").className = "result-box result-pending";
+      document.getElementById("result").className = "result-pending";
       document.getElementById("result").style.display = "block";
       btn.innerHTML = "📴 Saved Offline";
+      loadQuestionsForCategory(currentCategory);
     });
 }
 
